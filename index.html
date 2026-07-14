@@ -633,7 +633,7 @@ let songs = [];
 let votes = {}; // { songId: { voterName: score } }
 let myName = null;
 let editingId = null;
-let BUCKET_ID = '__NO_BUCKET__'; // auto-filled from the ?b= URL param, or created fresh on first visit
+let BLOB_ID = null; // auto-filled from the ?b= URL param, or created fresh on first visit
 
 function fmtTime(sec){
   sec = Math.max(0, Math.round(sec));
@@ -641,51 +641,54 @@ function fmtTime(sec){
   return m + ':' + String(s).padStart(2,'0');
 }
 
-function kvUrl(key){
-  return 'https://kvdb.io/' + BUCKET_ID + '/' + key;
-}
+const JB_BASE = 'https://jsonblob.com/api/jsonBlob';
 
-async function kvGet(key){
-  const res = await fetch(kvUrl(key));
-  if(res.status === 404) return null;
-  if(!res.ok) throw new Error('kvdb get failed: ' + res.status);
-  return await res.text();
-}
-
-async function kvSet(key, value){
-  const res = await fetch(kvUrl(key), {
+async function jbCreate(data){
+  const res = await fetch(JB_BASE, {
     method: 'POST',
-    headers: {'Content-Type': 'text/plain'},
-    body: value
+    headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+    body: JSON.stringify(data)
+  });
+  if(!res.ok) throw new Error('Could not create shared storage: ' + res.status);
+  const location = res.headers.get('Location');
+  if(!location) throw new Error('Storage was created but no ID came back (missing Location header)');
+  const parts = location.split('/');
+  return parts[parts.length - 1];
+}
+
+async function jbGet(blobId){
+  const res = await fetch(JB_BASE + '/' + blobId, {
+    headers: {'Accept': 'application/json'}
+  });
+  if(res.status === 404) return null;
+  if(!res.ok) throw new Error('jsonblob get failed: ' + res.status);
+  return await res.json();
+}
+
+async function jbPut(blobId, data){
+  const res = await fetch(JB_BASE + '/' + blobId, {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+    body: JSON.stringify(data)
   });
   if(!res.ok){
     let detail = '';
     try{ detail = await res.text(); }catch(e){}
-    throw new Error('kvdb set failed: ' + res.status + ' ' + detail);
+    throw new Error('jsonblob put failed: ' + res.status + ' ' + detail);
   }
 }
 
-async function createBucket(){
-  const res = await fetch('https://kvdb.io/', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-    body: 'email=band-setlist-board@example.com'
-  });
-  if(!res.ok) throw new Error('Could not create storage bucket: ' + res.status);
-  return (await res.text()).trim();
-}
-
-async function ensureBucket(){
+async function ensureBlob(){
   const params = new URLSearchParams(location.search);
   const fromUrl = params.get('b');
   if(fromUrl){
-    BUCKET_ID = fromUrl;
+    BLOB_ID = fromUrl;
     return;
   }
   const banner = document.getElementById('setupBanner');
   try{
-    const id = await createBucket();
-    BUCKET_ID = id;
+    const id = await jbCreate({songs: DEFAULT_SONGS, votes: {}});
+    BLOB_ID = id;
     const url = new URL(location.href);
     url.searchParams.set('b', id);
     history.replaceState(null, '', url);
@@ -703,49 +706,39 @@ async function ensureBucket(){
 }
 
 async function loadData(){
-  await ensureBucket();
+  await ensureBlob();
 
   try{
-    let sl = await kvGet('songlist');
-    if(sl){
-      songs = JSON.parse(sl);
-      // migrate: clear old performance notes on any of the originally preloaded songs
-      const defaultById = {};
-      DEFAULT_SONGS.forEach(d => defaultById[d.id] = d);
-      let changed = false;
-      songs.forEach(s => {
-        if(defaultById[s.id] && s.cue !== defaultById[s.id].cue){
-          s.cue = defaultById[s.id].cue;
-          changed = true;
-        }
-        if(typeof s.known !== 'boolean'){
-          s.known = defaultById[s.id] ? defaultById[s.id].known : true;
-          changed = true;
-        }
-        if(typeof s.needsToLearn !== 'boolean'){
-          s.needsToLearn = defaultById[s.id] ? defaultById[s.id].needsToLearn : !s.known;
-          changed = true;
-        }
-        if(typeof s.inPlaylist !== 'boolean'){
-          s.inPlaylist = defaultById[s.id] ? defaultById[s.id].inPlaylist : false;
-          changed = true;
-        }
-      });
-      if(changed) await kvSet('songlist', JSON.stringify(songs));
-    } else {
-      songs = DEFAULT_SONGS.slice();
-      await kvSet('songlist', JSON.stringify(songs));
-    }
+    const data = await jbGet(BLOB_ID);
+    songs = (data && Array.isArray(data.songs)) ? data.songs : DEFAULT_SONGS.slice();
+    votes = (data && data.votes) ? data.votes : {};
+
+    // migrate: clear old performance notes / backfill new fields on originally preloaded songs
+    const defaultById = {};
+    DEFAULT_SONGS.forEach(d => defaultById[d.id] = d);
+    let changed = !data;
+    songs.forEach(s => {
+      if(defaultById[s.id] && s.cue !== defaultById[s.id].cue){
+        s.cue = defaultById[s.id].cue;
+        changed = true;
+      }
+      if(typeof s.known !== 'boolean'){
+        s.known = defaultById[s.id] ? defaultById[s.id].known : true;
+        changed = true;
+      }
+      if(typeof s.needsToLearn !== 'boolean'){
+        s.needsToLearn = defaultById[s.id] ? defaultById[s.id].needsToLearn : !s.known;
+        changed = true;
+      }
+      if(typeof s.inPlaylist !== 'boolean'){
+        s.inPlaylist = defaultById[s.id] ? defaultById[s.id].inPlaylist : false;
+        changed = true;
+      }
+    });
+    if(changed) await jbPut(BLOB_ID, {songs, votes});
   } catch(e){
-    console.error('Could not load songs', e);
+    console.error('Could not load data', e);
     songs = DEFAULT_SONGS.slice();
-  }
-
-  try{
-    let av = await kvGet('all-votes');
-    votes = av ? JSON.parse(av) : {};
-  } catch(e){
-    console.error('Could not load votes', e);
     votes = {};
   }
 
@@ -766,14 +759,12 @@ function showSaveError(context){
   }
 }
 
-async function saveSongs(){
-  try{ await kvSet('songlist', JSON.stringify(songs)); }
-  catch(e){ console.error('Could not save songs', e); showSaveError('song list'); }
+async function saveAll(context){
+  try{ await jbPut(BLOB_ID, {songs, votes}); }
+  catch(e){ console.error('Could not save', e); showSaveError(context); }
 }
-async function saveVotes(){
-  try{ await kvSet('all-votes', JSON.stringify(votes)); }
-  catch(e){ console.error('Could not save votes', e); showSaveError('vote'); }
-}
+async function saveSongs(){ await saveAll('song list'); }
+async function saveVotes(){ await saveAll('vote'); }
 async function saveIdentity(name){
   try{ localStorage.setItem('setlist-voter-name', name); }
   catch(e){ console.error('Could not save identity', e); }
