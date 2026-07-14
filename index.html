@@ -1,11 +1,12 @@
-<!DOCTYPE html>
-<!-- saved from url=(0079)file:///Users/mccurdyz/Downloads/setlist-voting_4.html?b=TtTMt1tRTJcp5rdN6kHtr1 -->
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Backstage — Setlist Voting</title>
-<link rel="preconnect" href="https://fonts.googleapis.com/">
-<link href="./Backstage — Setlist Voting_files/css2" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Kalam:wght@700&display=swap" rel="stylesheet">
 <style>
   :root{
     --stage-black:#141219;
@@ -477,6 +478,22 @@
     text-align:center;
   }
   .setup-banner b{ color:var(--amber); }
+
+  .top-cta{
+    display:flex;
+    justify-content:center;
+    margin:22px auto 0;
+  }
+  .top-cta .btn{
+    font-family:'Oswald',sans-serif;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    font-size:14px;
+    padding:11px 26px;
+    border-radius:24px;
+    box-shadow:0 4px 14px rgba(232,163,61,0.25);
+  }
+  .top-cta .btn:hover{ box-shadow:0 6px 18px rgba(232,163,61,0.35); }
 </style>
 </head>
 <body>
@@ -498,535 +515,17 @@
   </div>
 </div>
 
-<div class="setup-banner" id="setupBanner" style="display: block;">Board created! This page's link now has a unique ID in it — copy the address bar URL and send <b>that exact link</b> to your bandmates. Everyone who opens it will share the same votes.</div>
+<div class="setup-banner" id="setupBanner"></div>
 
-<div class="idbar" id="idbar"><div class="chip">Voting as <b>Zach</b><button>change</button></div></div>
+<div class="top-cta">
+  <button class="btn" id="topAddBtn">+ Add a Song</button>
+</div>
 
-<main id="main"><div class="section"><div class="section-head"><h2>Song Pool</h2><span class="section-meta">32 songs · 126:04 if all played</span></div><div class="sheet"><div class="row-header">
-    <span class="rh-num"></span>
-    <span class="rh-main">Song</span>
-    <span class="rh-know">Know it</span>
-    <span class="rh-learn">Learn?</span>
-    <span class="rh-playlist">Playlist</span>
-    <span class="rh-duration">Time</span>
-    <span class="rh-dots">Your score</span>
-    <span class="rh-avg">Avg</span>
-    <span class="rh-status">Status</span>
-    <span class="rh-spotify"></span>
-    <span class="rh-edit"></span>
-  </div><div class="row">
-    <span class="row-num">01</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">Gimme Three Steps</span>
-        <span class="row-artist">Lynyrd Skynyrd</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">4:32</span>
-    <div class="row-dots" data-song="s1"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">02</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">Slow Ride</span>
-        <span class="row-artist">Foghat</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">4:41</span>
-    <div class="row-dots" data-song="s2"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">03</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">All Right Now</span>
-        <span class="row-artist">Free</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">6:00</span>
-    <div class="row-dots" data-song="s3"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">04</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">Hurts So Good</span>
-        <span class="row-artist">John Mellencamp</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">3:37</span>
-    <div class="row-dots" data-song="s4"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">05</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">Surrender</span>
-        <span class="row-artist">Cheap Trick</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">2:41</span>
-    <div class="row-dots" data-song="s5"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">06</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">Sweet Home Chicago</span>
-        <span class="row-artist">Blues Brothers</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">5:00</span>
-    <div class="row-dots" data-song="s6"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">07</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">Sweet Home Alabama</span>
-        <span class="row-artist">Lynyrd Skynyrd</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">4:43</span>
-    <div class="row-dots" data-song="s7"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">08</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">Come and Get Your Love</span>
-        <span class="row-artist">Redbone</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">3:47</span>
-    <div class="row-dots" data-song="s8"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">09</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">Feel Like Makin' Love</span>
-        <span class="row-artist">Bad Company</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">5:14</span>
-    <div class="row-dots" data-song="s9"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">10</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">Bad Moon Rising</span>
-        <span class="row-artist">Creedence Clearwater Revival</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">2:20</span>
-    <div class="row-dots" data-song="s10"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">11</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">Can't You See</span>
-        <span class="row-artist">The Marshall Tucker Band</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">4:38</span>
-    <div class="row-dots" data-song="s11"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">12</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">Free Fallin'</span>
-        <span class="row-artist">Tom Petty</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">4:15</span>
-    <div class="row-dots" data-song="s12"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">13</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">Brown Eyed Girl</span>
-        <span class="row-artist">Van Morrison</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">3:07</span>
-    <div class="row-dots" data-song="s13"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">14</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">For What It's Worth</span>
-        <span class="row-artist">Buffalo Springfield</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">2:37</span>
-    <div class="row-dots" data-song="s14"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">15</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">Take Me Home, Country Roads</span>
-        <span class="row-artist">John Denver</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">3:10</span>
-    <div class="row-dots" data-song="s15"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">16</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">Learning to Fly</span>
-        <span class="row-artist">Tom Petty</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">4:00</span>
-    <div class="row-dots" data-song="s16"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">17</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">Wagon Wheel</span>
-        <span class="row-artist">Old Crow Medicine Show</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">4:34</span>
-    <div class="row-dots" data-song="s17"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">18</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">Tennessee Whiskey</span>
-        <span class="row-artist">Chris Stapleton</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">4:47</span>
-    <div class="row-dots" data-song="s18"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">19</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">Hold On Loosely</span>
-        <span class="row-artist">.38 Special</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">3:52</span>
-    <div class="row-dots" data-song="s19"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">20</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">I Won't Back Down</span>
-        <span class="row-artist">Tom Petty</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">2:57</span>
-    <div class="row-dots" data-song="s20"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">21</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">Just What I Needed</span>
-        <span class="row-artist">The Cars</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">3:41</span>
-    <div class="row-dots" data-song="s21"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">22</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">The Middle</span>
-        <span class="row-artist">Jimmy Eat World</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">2:45</span>
-    <div class="row-dots" data-song="s22"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">23</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">Radar Love</span>
-        <span class="row-artist">Golden Earring</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">6:30</span>
-    <div class="row-dots" data-song="s23"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">24</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">Your Love</span>
-        <span class="row-artist">The Outfield</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">4:56</span>
-    <div class="row-dots" data-song="s24"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">25</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">Fortunate Son</span>
-        <span class="row-artist">Creedence Clearwater Revival</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">3:30</span>
-    <div class="row-dots" data-song="s25"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">26</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">Born to Be Wild</span>
-        <span class="row-artist">Steppenwolf</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">3:30</span>
-    <div class="row-dots" data-song="s26"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">27</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">American Girl</span>
-        <span class="row-artist">Tom Petty</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">3:32</span>
-    <div class="row-dots" data-song="s27"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">28</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">I'll Be There For You</span>
-        <span class="row-artist">The Rembrandts</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">2:45</span>
-    <div class="row-dots" data-song="s28"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">29</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">Seven Nation Army</span>
-        <span class="row-artist">The White Stripes</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">3:52</span>
-    <div class="row-dots" data-song="s29"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">30</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">Mississippi Queen</span>
-        <span class="row-artist">Mountain</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">3:32</span>
-    <div class="row-dots" data-song="s30"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">31</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">What I Like About You</span>
-        <span class="row-artist">The Romantics</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">2:37</span>
-    <div class="row-dots" data-song="s31"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
-    <span class="row-num">32</span>
-    <div class="row-main">
-      <div class="row-title-line">
-        <span class="row-title">Runnin' Down a Dream</span>
-        <span class="row-artist">Tom Petty</span>
-        
-      </div>
-    </div>
-    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
-    <button class="learn-col " title="Click to toggle">Learn</button>
-    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
-    <span class="row-duration">4:22</span>
-    <div class="row-dots" data-song="s32"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
-    <span class="row-avg">—</span>
-    <span class="status-badge status-none">Unrated</span>
-  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="add-row">+ Add a song</div></div></div></main>
+<div class="idbar" id="idbar"></div>
+
+<main id="main">
+  <div class="loading-msg">Loading the setlist…</div>
+</main>
 
 <footer>
   Data is shared with everyone using this board. &nbsp;·&nbsp;
@@ -1134,7 +633,7 @@ let songs = [];
 let votes = {}; // { songId: { voterName: score } }
 let myName = null;
 let editingId = null;
-let BUCKET_ID = '__NO_BUCKET__'; // auto-filled on first run; this exact line gets rewritten into the downloadable copy
+let BUCKET_ID = '__NO_BUCKET__'; // auto-filled from the ?b= URL param, or created fresh on first visit
 
 function fmtTime(sec){
   sec = Math.max(0, Math.round(sec));
@@ -1159,7 +658,11 @@ async function kvSet(key, value){
     headers: {'Content-Type': 'text/plain'},
     body: value
   });
-  if(!res.ok) throw new Error('kvdb set failed: ' + res.status);
+  if(!res.ok){
+    let detail = '';
+    try{ detail = await res.text(); }catch(e){}
+    throw new Error('kvdb set failed: ' + res.status + ' ' + detail);
+  }
 }
 
 async function createBucket(){
@@ -1253,13 +756,23 @@ async function loadData(){
   }
 }
 
+function showSaveError(context){
+  const banner = document.getElementById('setupBanner');
+  if(banner){
+    banner.innerHTML = 'Could not save your last change (' + context + '). Check your connection and try again — if it keeps happening, open the browser console (right-click → Inspect → Console) and tell Claude what error appears.';
+    banner.style.background = 'rgba(193,90,72,0.16)';
+    banner.style.borderColor = 'var(--red)';
+    banner.style.display = 'block';
+  }
+}
+
 async function saveSongs(){
   try{ await kvSet('songlist', JSON.stringify(songs)); }
-  catch(e){ console.error('Could not save songs', e); }
+  catch(e){ console.error('Could not save songs', e); showSaveError('song list'); }
 }
 async function saveVotes(){
   try{ await kvSet('all-votes', JSON.stringify(votes)); }
-  catch(e){ console.error('Could not save votes', e); }
+  catch(e){ console.error('Could not save votes', e); showSaveError('vote'); }
 }
 async function saveIdentity(name){
   try{ localStorage.setItem('setlist-voter-name', name); }
@@ -1481,6 +994,8 @@ function openAddModal(existing){
   document.getElementById('f-title').focus();
 }
 
+document.getElementById('topAddBtn').onclick = () => openAddModal();
+
 document.getElementById('f-cancel').onclick = () => {
   document.getElementById('addOverlay').classList.remove('show');
 };
@@ -1550,6 +1065,5 @@ document.getElementById('resetBtn').onclick = async () => {
   render();
 })();
 </script>
-
-
-</body></html>
+</body>
+</html>
