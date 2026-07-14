@@ -633,7 +633,6 @@ let songs = [];
 let votes = {}; // { songId: { voterName: score } }
 let myName = null;
 let editingId = null;
-let BLOB_ID = null; // auto-filled from the ?b= URL param, or created fresh on first visit
 
 function fmtTime(sec){
   sec = Math.max(0, Math.round(sec));
@@ -641,75 +640,34 @@ function fmtTime(sec){
   return m + ':' + String(s).padStart(2,'0');
 }
 
-const JB_BASE = 'https://jsonblob.com/api/jsonBlob';
+const FIREBASE_URL = 'https://theoutdated-e8304-default-rtdb.firebaseio.com';
 
-async function jbCreate(data){
-  const res = await fetch(JB_BASE, {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
-    body: JSON.stringify(data)
-  });
-  if(!res.ok) throw new Error('Could not create shared storage: ' + res.status);
-  const location = res.headers.get('Location');
-  if(!location) throw new Error('Storage was created but no ID came back (missing Location header)');
-  const parts = location.split('/');
-  return parts[parts.length - 1];
+async function fbGet(path){
+  const res = await fetch(FIREBASE_URL + '/' + path + '.json');
+  if(!res.ok){
+    let detail = '';
+    try{ detail = await res.text(); }catch(e){}
+    throw new Error('Firebase get failed: ' + res.status + ' ' + detail);
+  }
+  return await res.json(); // null if nothing stored yet
 }
 
-async function jbGet(blobId){
-  const res = await fetch(JB_BASE + '/' + blobId, {
-    headers: {'Accept': 'application/json'}
-  });
-  if(res.status === 404) return null;
-  if(!res.ok) throw new Error('jsonblob get failed: ' + res.status);
-  return await res.json();
-}
-
-async function jbPut(blobId, data){
-  const res = await fetch(JB_BASE + '/' + blobId, {
+async function fbSet(path, data){
+  const res = await fetch(FIREBASE_URL + '/' + path + '.json', {
     method: 'PUT',
-    headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+    headers: {'Content-Type': 'application/json'},
     body: JSON.stringify(data)
   });
   if(!res.ok){
     let detail = '';
     try{ detail = await res.text(); }catch(e){}
-    throw new Error('jsonblob put failed: ' + res.status + ' ' + detail);
-  }
-}
-
-async function ensureBlob(){
-  const params = new URLSearchParams(location.search);
-  const fromUrl = params.get('b');
-  if(fromUrl){
-    BLOB_ID = fromUrl;
-    return;
-  }
-  const banner = document.getElementById('setupBanner');
-  try{
-    const id = await jbCreate({songs: DEFAULT_SONGS, votes: {}});
-    BLOB_ID = id;
-    const url = new URL(location.href);
-    url.searchParams.set('b', id);
-    history.replaceState(null, '', url);
-    if(banner){
-      banner.innerHTML = 'Board created! This page\'s link now has a unique ID in it — copy the address bar URL and send <b>that exact link</b> to your bandmates. Everyone who opens it will share the same votes.';
-      banner.style.display = 'block';
-    }
-  } catch(e){
-    if(banner){
-      banner.innerHTML = 'Could not set up shared storage — check your connection and reload the page to try again.';
-      banner.style.display = 'block';
-    }
-    throw e;
+    throw new Error('Firebase set failed: ' + res.status + ' ' + detail);
   }
 }
 
 async function loadData(){
-  await ensureBlob();
-
   try{
-    const data = await jbGet(BLOB_ID);
+    const data = await fbGet('board');
     songs = (data && Array.isArray(data.songs)) ? data.songs : DEFAULT_SONGS.slice();
     votes = (data && data.votes) ? data.votes : {};
 
@@ -735,9 +693,14 @@ async function loadData(){
         changed = true;
       }
     });
-    if(changed) await jbPut(BLOB_ID, {songs, votes});
+    if(changed) await fbSet('board', {songs, votes});
   } catch(e){
     console.error('Could not load data', e);
+    const banner = document.getElementById('setupBanner');
+    if(banner){
+      banner.innerHTML = 'Could not load the shared board — check your connection and reload. If this keeps happening, open the browser console and tell Claude the error.';
+      banner.style.display = 'block';
+    }
     songs = DEFAULT_SONGS.slice();
     votes = {};
   }
@@ -760,7 +723,7 @@ function showSaveError(context){
 }
 
 async function saveAll(context){
-  try{ await jbPut(BLOB_ID, {songs, votes}); }
+  try{ await fbSet('board', {songs, votes}); }
   catch(e){ console.error('Could not save', e); showSaveError(context); }
 }
 async function saveSongs(){ await saveAll('song list'); }
