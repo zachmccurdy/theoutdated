@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<!-- saved from url=(0079)file:///Users/mccurdyz/Downloads/setlist-voting_4.html?b=TtTMt1tRTJcp5rdN6kHtr1 -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backstage — Setlist Voting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link href="./Backstage — Setlist Voting_files/css2" rel="stylesheet">
+<style>
+  :root{
+    --stage-black:#141219;
+    --stage-black-2:#1c1922;
+    --stage-black-3:#242030;
+    --amber:#e8a33d;
+    --amber-dim:#a9762b;
+    --paper:#efe6d0;
+    --paper-dim:#d9cfb4;
+    --tape:#9a9488;
+    --green:#63a15f;
+    --green-dim:#3c5c3a;
+    --amber-warn:#d9a441;
+    --red:#c15a48;
+    --red-dim:#5c3a34;
+    --text-light:#f2ede0;
+    --text-dim:#a39c8e;
+    --text-faint:#6f6a60;
+    --radius:3px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse at 50% -10%, rgba(232,163,61,0.10), transparent 55%),
+      var(--stage-black);
+    color:var(--text-light);
+    font-family:'Space Grotesk',sans-serif;
+    min-height:100vh;
+    padding:0 0 60px;
+  }
+  .marquee{
+    text-align:center;
+    padding:38px 20px 24px;
+    border-bottom:1px solid var(--stage-black-3);
+    position:relative;
+  }
+  .marquee::before{
+    content:'';
+    position:absolute; left:0; right:0; top:0; height:3px;
+    background:linear-gradient(90deg, transparent, var(--amber), transparent);
+    opacity:0.6;
+  }
+  .eyebrow{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:11px;
+    letter-spacing:0.32em;
+    text-transform:uppercase;
+    color:var(--amber);
+    margin-bottom:10px;
+  }
+  h1{
+    font-family:'Oswald',sans-serif;
+    font-weight:700;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    font-size:clamp(28px,5vw,44px);
+    margin:0;
+    text-shadow:0 0 26px rgba(232,163,61,0.25);
+  }
+  .sub{
+    color:var(--text-dim);
+    font-size:14px;
+    margin-top:8px;
+  }
+
+  /* gauge */
+  .gauge-wrap{
+    max-width:640px;
+    margin:26px auto 0;
+    padding:0 20px;
+  }
+  .gauge-labels{
+    display:flex;
+    justify-content:space-between;
+    font-family:'Oswald',sans-serif;
+    font-size:12px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--text-dim);
+    margin-bottom:6px;
+  }
+  .gauge-labels b{ color:var(--text-light); font-size:15px; letter-spacing:0.02em; }
+  .gauge{
+    height:14px;
+    background:var(--stage-black-2);
+    border:1px solid var(--stage-black-3);
+    border-radius:2px;
+    overflow:hidden;
+    position:relative;
+    display:flex;
+  }
+  .gauge-fill{
+    height:100%;
+    transition:width .35s ease;
+    background:repeating-linear-gradient(90deg, var(--green) 0 8px, var(--green-dim) 8px 9px);
+  }
+  .gauge-fill.over{
+    background:repeating-linear-gradient(90deg, var(--red) 0 8px, var(--red-dim) 8px 9px);
+  }
+  .gauge-target-line{
+    position:absolute; top:0; bottom:0; width:2px; background:var(--amber);
+    box-shadow:0 0 8px var(--amber);
+  }
+  .gauge-ticks{ display:flex; justify-content:space-between; margin-top:4px; }
+  .gauge-ticks span{ font-size:10px; color:var(--text-faint); }
+
+  /* identity bar */
+  .idbar{
+    max-width:900px;
+    margin:22px auto 0;
+    padding:0 20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .chip{
+    background:var(--stage-black-2);
+    border:1px solid var(--stage-black-3);
+    padding:8px 14px;
+    border-radius:20px;
+    font-size:13px;
+    color:var(--text-dim);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .chip b{ color:var(--amber); font-weight:600; }
+  .chip button{
+    background:none; border:none; color:var(--text-faint);
+    text-decoration:underline; cursor:pointer; font-size:12px; font-family:inherit;
+    padding:0;
+  }
+  .idform{ display:flex; gap:8px; align-items:center; }
+  .idform input{
+    background:var(--stage-black-2);
+    border:1px solid var(--stage-black-3);
+    color:var(--text-light);
+    padding:8px 12px;
+    border-radius:20px;
+    font-family:inherit;
+    font-size:13px;
+    outline:none;
+  }
+  .idform input:focus{ border-color:var(--amber-dim); }
+  .btn{
+    background:var(--amber);
+    color:var(--stage-black);
+    border:none;
+    padding:8px 16px;
+    border-radius:20px;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:13px;
+    cursor:pointer;
+  }
+  .btn:hover{ background:#f0b459; }
+  .btn.ghost{
+    background:transparent;
+    color:var(--amber);
+    border:1px solid var(--amber-dim);
+  }
+  .btn.ghost:hover{ background:rgba(232,163,61,0.08); }
+  .btn.small{ padding:6px 12px; font-size:12px; }
+
+  main{ max-width:1100px; margin:0 auto; padding:34px 20px 0; }
+
+  .section{ margin-bottom:44px; }
+  .section-head{
+    display:flex;
+    align-items:baseline;
+    gap:14px;
+    margin-bottom:18px;
+    border-bottom:1px dashed var(--stage-black-3);
+    padding-bottom:10px;
+  }
+  .section-head h2{
+    font-family:'Kalam',cursive;
+    font-weight:700;
+    font-size:26px;
+    color:var(--paper);
+    margin:0;
+    transform:rotate(-1deg);
+  }
+  .section-meta{ font-size:12px; color:var(--text-faint); font-family:'Space Grotesk'; }
+
+  .sheet{
+    background:linear-gradient(180deg, var(--paper), var(--paper-dim));
+    color:#1c1710;
+    border-radius:3px;
+    position:relative;
+    box-shadow:0 8px 20px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(0,0,0,0.05);
+  }
+  .sheet::before{
+    content:'';
+    position:absolute;
+    top:-9px; left:50%; transform:translateX(-50%) rotate(-1.5deg);
+    width:70px; height:20px;
+    background:rgba(154,148,136,0.55);
+    border:1px solid rgba(0,0,0,0.08);
+  }
+
+  .row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:11px 18px;
+    border-bottom:1px dashed rgba(0,0,0,0.14);
+  }
+  .row:last-of-type{ border-bottom:none; }
+
+  .row-num{
+    font-family:'Oswald',sans-serif;
+    font-size:12px;
+    color:#8a7f5c;
+    letter-spacing:0.04em;
+    width:22px;
+    flex-shrink:0;
+  }
+
+  .row-main{ flex:1 1 auto; min-width:0; }
+  .row-title-line{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; row-gap:3px; }
+  .row-title{
+    font-family:'Oswald',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    white-space:nowrap;
+  }
+  .row-artist{ font-size:11.5px; color:#6b6250; white-space:nowrap; }
+  .cue{
+    font-family:'Kalam',cursive;
+    font-size:12px;
+    color:#7a5a2c;
+    background:rgba(232,163,61,0.16);
+    display:inline-block;
+    padding:1px 7px;
+    border-radius:2px;
+  }
+  .know-col, .learn-col, .playlist-col{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:10.5px;
+    font-weight:600;
+    letter-spacing:0.02em;
+    padding:4px 2px;
+    border-radius:9px;
+    white-space:nowrap;
+    width:52px;
+    flex-shrink:0;
+    text-align:center;
+    border:1px solid rgba(0,0,0,0.14);
+    background:transparent;
+    color:#8a7f5c;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .playlist-col{ width:68px; }
+  .know-col:hover, .learn-col:hover, .playlist-col:hover{ border-color:#3a3122; }
+  .know-col.is-on{ color:#3f6b3c; background:rgba(99,161,95,0.18); border-color:transparent; }
+  .learn-col.is-on{ color:#a1442f; background:rgba(193,90,72,0.18); border-color:transparent; }
+  .playlist-col.is-on{ color:#8a611c; background:rgba(232,163,61,0.22); border-color:transparent; font-weight:700; }
+
+  .edit-btn{
+    flex-shrink:0;
+    width:28px; height:28px;
+    display:flex; align-items:center; justify-content:center;
+    background:transparent;
+    color:#8a7f5c;
+    border:1px solid #b8ab84;
+    border-radius:50%;
+    font-size:12px;
+    cursor:pointer;
+  }
+  .edit-btn:hover{ color:#3a3122; border-color:#3a3122; }
+
+  .row-header{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:9px 18px;
+    border-bottom:1px solid rgba(0,0,0,0.14);
+    font-family:'Oswald',sans-serif;
+    font-size:10px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:#8a7f5c;
+  }
+  .row-header .rh-num{ width:22px; flex-shrink:0; }
+  .row-header .rh-main{ flex:1 1 auto; }
+  .row-header .rh-know{ width:52px; flex-shrink:0; text-align:center; }
+  .row-header .rh-learn{ width:52px; flex-shrink:0; text-align:center; }
+  .row-header .rh-playlist{ width:68px; flex-shrink:0; text-align:center; }
+  .row-header .rh-duration{ width:40px; flex-shrink:0; text-align:right; }
+  .row-header .rh-dots{ width:134px; flex-shrink:0; }
+  .row-header .rh-avg{ width:78px; flex-shrink:0; text-align:right; }
+  .row-header .rh-status{ min-width:52px; flex-shrink:0; text-align:center; }
+  .row-header .rh-spotify{ width:28px; flex-shrink:0; }
+  .row-header .rh-edit{ width:28px; flex-shrink:0; }
+  @media (max-width:640px){ .row-header{ display:none; } }
+
+  .row-duration{
+    font-size:11px; color:#8a7f5c; width:40px; text-align:right; flex-shrink:0;
+  }
+
+  .row-dots{ display:flex; gap:3px; flex-shrink:0; }
+  .dot{
+    width:22px; height:22px;
+    border-radius:50%;
+    border:1px solid #b8ab84;
+    background:transparent;
+    cursor:pointer;
+    font-family:'Space Grotesk';
+    font-size:11px;
+    color:#6b6250;
+    display:flex; align-items:center; justify-content:center;
+    transition:all .15s ease;
+    flex-shrink:0;
+    padding:0;
+  }
+  .dot:hover{ border-color:#8a7f5c; }
+  .dot.active{
+    background:#3a3122;
+    border-color:#3a3122;
+    color:var(--amber);
+    font-weight:700;
+  }
+
+  .row-avg{
+    width:78px; flex-shrink:0; text-align:right;
+    font-size:11.5px; color:#6b6250;
+  }
+  .row-avg b{ color:#2a2412; font-size:12.5px; }
+
+  .status-badge{
+    font-family:'Oswald',sans-serif;
+    font-size:10px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    padding:3px 8px;
+    border-radius:10px;
+    color:var(--text-light);
+    white-space:nowrap;
+    flex-shrink:0;
+    min-width:52px;
+    text-align:center;
+  }
+  .status-in{ background:var(--green); }
+  .status-maybe{ background:var(--amber-warn); color:#2a1e07; }
+  .status-out{ background:#8a8378; color:#f2ede0; }
+  .status-none{ background:transparent; color:#8a7f5c; border:1px dashed #8a7f5c; }
+
+  .spotify-btn{
+    flex-shrink:0;
+    width:28px; height:28px;
+    display:flex; align-items:center; justify-content:center;
+    background:#1DB954;
+    color:#08210f;
+    border:none;
+    border-radius:50%;
+    font-size:13px;
+    cursor:pointer;
+  }
+  .spotify-btn:hover{ filter:brightness(1.08); }
+
+  .add-row{
+    padding:13px 18px;
+    color:#8a7f5c;
+    cursor:pointer;
+    font-family:'Oswald',sans-serif;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    font-size:12px;
+    text-align:center;
+    transition:all .15s ease;
+  }
+  .add-row:hover{ color:#5c4f2c; background:rgba(0,0,0,0.04); }
+
+  @media (max-width:640px){
+    .row{ flex-wrap:wrap; row-gap:8px; }
+    .row-main{ flex-basis:100%; order:1; }
+    .row-num{ order:0; }
+    .know-col{ order:2; }
+    .learn-col{ order:2; }
+    .playlist-col{ order:2; }
+    .row-duration{ order:3; }
+    .row-dots{ order:4; }
+    .row-avg{ order:5; }
+    .status-badge{ order:6; }
+    .spotify-btn{ order:7; }
+    .edit-btn{ order:8; }
+  }
+
+  /* modal */
+  .overlay{
+    position:fixed; inset:0; background:rgba(10,9,13,0.7);
+    display:none; align-items:center; justify-content:center; z-index:50;
+    padding:20px;
+  }
+  .overlay.show{ display:flex; }
+  .modal{
+    background:var(--stage-black-2);
+    border:1px solid var(--stage-black-3);
+    border-radius:6px;
+    padding:26px;
+    width:100%; max-width:420px;
+  }
+  .modal h3{
+    font-family:'Oswald',sans-serif;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    margin:0 0 16px;
+    font-size:17px;
+    color:var(--amber);
+  }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:11px; color:var(--text-dim); margin-bottom:5px; text-transform:uppercase; letter-spacing:0.06em; }
+  .field input, .field select{
+    width:100%;
+    background:var(--stage-black);
+    border:1px solid var(--stage-black-3);
+    color:var(--text-light);
+    padding:9px 11px;
+    border-radius:3px;
+    font-family:inherit;
+    font-size:14px;
+    outline:none;
+  }
+  .field input:focus, .field select:focus{ border-color:var(--amber-dim); }
+  .checkbox-field{ margin-bottom:6px; }
+  .checkbox-label{
+    display:flex !important;
+    align-items:center;
+    gap:9px;
+    cursor:pointer;
+    text-transform:none !important;
+    letter-spacing:0 !important;
+    font-size:13.5px !important;
+    color:var(--text-light) !important;
+  }
+  .checkbox-label input{ width:auto; accent-color:var(--amber); cursor:pointer; }
+  .field-row{ display:flex; gap:10px; }
+  .field-row .field{ flex:1; }
+  .modal-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }
+
+  footer{
+    text-align:center;
+    padding:30px 20px 0;
+    color:var(--text-faint);
+    font-size:11.5px;
+  }
+  footer button{
+    background:none; border:none; color:var(--text-faint); text-decoration:underline;
+    cursor:pointer; font-family:inherit; font-size:11.5px;
+  }
+  .loading-msg{ text-align:center; color:var(--text-dim); padding:60px 20px; font-size:14px; }
+
+  .setup-banner{
+    display:none;
+    max-width:640px;
+    margin:18px auto 0;
+    padding:12px 16px;
+    background:rgba(232,163,61,0.14);
+    border:1px solid var(--amber-dim);
+    border-radius:4px;
+    color:var(--text-light);
+    font-size:13px;
+    line-height:1.5;
+    text-align:center;
+  }
+  .setup-banner b{ color:var(--amber); }
+</style>
+</head>
+<body>
+
+<div class="marquee">
+  <div class="eyebrow">Backstage · Live Setlist Builder</div>
+  <h1>Two-Hour Set</h1>
+  <div class="sub">Rate each song 1–5. The board tallies everyone's score live.</div>
+
+  <div class="gauge-wrap">
+    <div class="gauge-labels">
+      <span>Set time (songs added to playlist)</span>
+      <b id="gaugeText">0:00 / 120:00</b>
+    </div>
+    <div class="gauge"><div class="gauge-fill" id="gaugeFill" style="width:0%"></div></div>
+    <div class="gauge-ticks">
+      <span>0:00</span><span>30:00</span><span>60:00</span><span>90:00</span><span>120:00</span>
+    </div>
+  </div>
+</div>
+
+<div class="setup-banner" id="setupBanner" style="display: block;">Board created! This page's link now has a unique ID in it — copy the address bar URL and send <b>that exact link</b> to your bandmates. Everyone who opens it will share the same votes.</div>
+
+<div class="idbar" id="idbar"><div class="chip">Voting as <b>Zach</b><button>change</button></div></div>
+
+<main id="main"><div class="section"><div class="section-head"><h2>Song Pool</h2><span class="section-meta">32 songs · 126:04 if all played</span></div><div class="sheet"><div class="row-header">
+    <span class="rh-num"></span>
+    <span class="rh-main">Song</span>
+    <span class="rh-know">Know it</span>
+    <span class="rh-learn">Learn?</span>
+    <span class="rh-playlist">Playlist</span>
+    <span class="rh-duration">Time</span>
+    <span class="rh-dots">Your score</span>
+    <span class="rh-avg">Avg</span>
+    <span class="rh-status">Status</span>
+    <span class="rh-spotify"></span>
+    <span class="rh-edit"></span>
+  </div><div class="row">
+    <span class="row-num">01</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">Gimme Three Steps</span>
+        <span class="row-artist">Lynyrd Skynyrd</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">4:32</span>
+    <div class="row-dots" data-song="s1"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">02</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">Slow Ride</span>
+        <span class="row-artist">Foghat</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">4:41</span>
+    <div class="row-dots" data-song="s2"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">03</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">All Right Now</span>
+        <span class="row-artist">Free</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">6:00</span>
+    <div class="row-dots" data-song="s3"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">04</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">Hurts So Good</span>
+        <span class="row-artist">John Mellencamp</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">3:37</span>
+    <div class="row-dots" data-song="s4"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">05</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">Surrender</span>
+        <span class="row-artist">Cheap Trick</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">2:41</span>
+    <div class="row-dots" data-song="s5"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">06</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">Sweet Home Chicago</span>
+        <span class="row-artist">Blues Brothers</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">5:00</span>
+    <div class="row-dots" data-song="s6"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">07</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">Sweet Home Alabama</span>
+        <span class="row-artist">Lynyrd Skynyrd</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">4:43</span>
+    <div class="row-dots" data-song="s7"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">08</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">Come and Get Your Love</span>
+        <span class="row-artist">Redbone</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">3:47</span>
+    <div class="row-dots" data-song="s8"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">09</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">Feel Like Makin' Love</span>
+        <span class="row-artist">Bad Company</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">5:14</span>
+    <div class="row-dots" data-song="s9"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">10</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">Bad Moon Rising</span>
+        <span class="row-artist">Creedence Clearwater Revival</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">2:20</span>
+    <div class="row-dots" data-song="s10"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">11</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">Can't You See</span>
+        <span class="row-artist">The Marshall Tucker Band</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">4:38</span>
+    <div class="row-dots" data-song="s11"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">12</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">Free Fallin'</span>
+        <span class="row-artist">Tom Petty</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">4:15</span>
+    <div class="row-dots" data-song="s12"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">13</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">Brown Eyed Girl</span>
+        <span class="row-artist">Van Morrison</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">3:07</span>
+    <div class="row-dots" data-song="s13"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">14</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">For What It's Worth</span>
+        <span class="row-artist">Buffalo Springfield</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">2:37</span>
+    <div class="row-dots" data-song="s14"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">15</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">Take Me Home, Country Roads</span>
+        <span class="row-artist">John Denver</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">3:10</span>
+    <div class="row-dots" data-song="s15"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">16</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">Learning to Fly</span>
+        <span class="row-artist">Tom Petty</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">4:00</span>
+    <div class="row-dots" data-song="s16"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">17</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">Wagon Wheel</span>
+        <span class="row-artist">Old Crow Medicine Show</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">4:34</span>
+    <div class="row-dots" data-song="s17"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">18</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">Tennessee Whiskey</span>
+        <span class="row-artist">Chris Stapleton</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">4:47</span>
+    <div class="row-dots" data-song="s18"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">19</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">Hold On Loosely</span>
+        <span class="row-artist">.38 Special</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">3:52</span>
+    <div class="row-dots" data-song="s19"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">20</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">I Won't Back Down</span>
+        <span class="row-artist">Tom Petty</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">2:57</span>
+    <div class="row-dots" data-song="s20"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">21</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">Just What I Needed</span>
+        <span class="row-artist">The Cars</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">3:41</span>
+    <div class="row-dots" data-song="s21"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">22</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">The Middle</span>
+        <span class="row-artist">Jimmy Eat World</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">2:45</span>
+    <div class="row-dots" data-song="s22"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">23</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">Radar Love</span>
+        <span class="row-artist">Golden Earring</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">6:30</span>
+    <div class="row-dots" data-song="s23"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">24</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">Your Love</span>
+        <span class="row-artist">The Outfield</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">4:56</span>
+    <div class="row-dots" data-song="s24"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">25</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">Fortunate Son</span>
+        <span class="row-artist">Creedence Clearwater Revival</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">3:30</span>
+    <div class="row-dots" data-song="s25"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">26</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">Born to Be Wild</span>
+        <span class="row-artist">Steppenwolf</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">3:30</span>
+    <div class="row-dots" data-song="s26"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">27</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">American Girl</span>
+        <span class="row-artist">Tom Petty</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">3:32</span>
+    <div class="row-dots" data-song="s27"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">28</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">I'll Be There For You</span>
+        <span class="row-artist">The Rembrandts</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">2:45</span>
+    <div class="row-dots" data-song="s28"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">29</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">Seven Nation Army</span>
+        <span class="row-artist">The White Stripes</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">3:52</span>
+    <div class="row-dots" data-song="s29"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">30</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">Mississippi Queen</span>
+        <span class="row-artist">Mountain</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">3:32</span>
+    <div class="row-dots" data-song="s30"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">31</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">What I Like About You</span>
+        <span class="row-artist">The Romantics</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">2:37</span>
+    <div class="row-dots" data-song="s31"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="row">
+    <span class="row-num">32</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">Runnin' Down a Dream</span>
+        <span class="row-artist">Tom Petty</span>
+        
+      </div>
+    </div>
+    <button class="know-col is-on" title="Click to toggle">✓ Know</button>
+    <button class="learn-col " title="Click to toggle">Learn</button>
+    <button class="playlist-col " title="Click to toggle">+ Playlist</button>
+    <span class="row-duration">4:22</span>
+    <div class="row-dots" data-song="s32"><button class="dot">1</button><button class="dot">2</button><button class="dot">3</button><button class="dot">4</button><button class="dot">5</button></div>
+    <span class="row-avg">—</span>
+    <span class="status-badge status-none">Unrated</span>
+  <button class="spotify-btn" title="Search on Spotify">♫</button><button class="edit-btn" title="Edit song">✎</button></div><div class="add-row">+ Add a song</div></div></div></main>
+
+<footer>
+  Data is shared with everyone using this board. &nbsp;·&nbsp;
+  <button id="resetBtn">Reset all songs &amp; votes</button>
+</footer>
+
+<div class="overlay" id="addOverlay">
+  <div class="modal">
+    <h3 id="modalTitle">Add a song</h3>
+    <div class="field">
+      <label>Title</label>
+      <input id="f-title" type="text" placeholder="Song title">
+    </div>
+    <div class="field">
+      <label>Artist</label>
+      <input id="f-artist" type="text" placeholder="Original artist">
+    </div>
+    <div class="field">
+      <label>Duration (mm:ss)</label>
+      <input id="f-duration" type="text" placeholder="4:00">
+    </div>
+    <div class="field">
+      <label>Cue / note (optional)</label>
+      <input id="f-cue" type="text" placeholder="e.g. jam in middle">
+    </div>
+    <div class="field checkbox-field">
+      <label class="checkbox-label">
+        <input id="f-known" type="checkbox">
+        <span>We already know this one</span>
+      </label>
+    </div>
+    <div class="field checkbox-field">
+      <label class="checkbox-label">
+        <input id="f-needslearn" type="checkbox">
+        <span>Needs to be learned / rehearsed</span>
+      </label>
+    </div>
+    <div class="field checkbox-field">
+      <label class="checkbox-label">
+        <input id="f-playlist" type="checkbox">
+        <span>Add to this show's playlist</span>
+      </label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost small" id="f-delete" style="display:none; margin-right:auto; color:var(--red);">Delete song</button>
+      <button class="btn ghost small" id="f-cancel">Cancel</button>
+      <button class="btn small" id="f-save">Add song</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="nameOverlay">
+  <div class="modal">
+    <h3>Who's voting?</h3>
+    <div class="field">
+      <label>Your name</label>
+      <input id="f-name" type="text" placeholder="e.g. Zach">
+    </div>
+    <div class="modal-actions">
+      <button class="btn small" id="f-name-save">Let's go</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const TARGET_SECONDS = 120*60;
+const SECTIONS = ["Set 1","Acoustic Break","Set 2"];
+
+const DEFAULT_SONGS = [
+  {id:'s1',  title:'Gimme Three Steps', artist:'Lynyrd Skynyrd', section:'Set 1', duration:272, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s2',  title:'Slow Ride', artist:'Foghat', section:'Set 1', duration:281, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s3',  title:'All Right Now', artist:'Free', section:'Set 1', duration:360, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s4',  title:'Hurts So Good', artist:'John Mellencamp', section:'Set 1', duration:217, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s5',  title:'Surrender', artist:'Cheap Trick', section:'Set 1', duration:161, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s6',  title:'Sweet Home Chicago', artist:'Blues Brothers', section:'Set 1', duration:300, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s7',  title:'Sweet Home Alabama', artist:'Lynyrd Skynyrd', section:'Set 1', duration:283, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s8',  title:'Come and Get Your Love', artist:'Redbone', section:'Set 1', duration:227, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s9',  title:'Feel Like Makin\' Love', artist:'Bad Company', section:'Set 1', duration:314, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s10', title:'Bad Moon Rising', artist:'Creedence Clearwater Revival', section:'Set 1', duration:140, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s11', title:'Can\'t You See', artist:'The Marshall Tucker Band', section:'Set 1', duration:278, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s12', title:'Free Fallin\'', artist:'Tom Petty', section:'Set 1', duration:255, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s13', title:'Brown Eyed Girl', artist:'Van Morrison', section:'Set 1', duration:187, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s14', title:'For What It\'s Worth', artist:'Buffalo Springfield', section:'Set 1', duration:157, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s15', title:'Take Me Home, Country Roads', artist:'John Denver', section:'Set 1', duration:190, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s16', title:'Learning to Fly', artist:'Tom Petty', section:'Set 1', duration:240, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s17', title:'Wagon Wheel', artist:'Old Crow Medicine Show', section:'Set 1', duration:274, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s18', title:'Tennessee Whiskey', artist:'Chris Stapleton', section:'Acoustic Break', duration:287, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s19', title:'Hold On Loosely', artist:'.38 Special', section:'Acoustic Break', duration:232, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s20', title:'I Won\'t Back Down', artist:'Tom Petty', section:'Acoustic Break', duration:177, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s21', title:'Just What I Needed', artist:'The Cars', section:'Acoustic Break', duration:221, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s22', title:'The Middle', artist:'Jimmy Eat World', section:'Acoustic Break', duration:165, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s23', title:'Radar Love', artist:'Golden Earring', section:'Acoustic Break', duration:390, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s24', title:'Your Love', artist:'The Outfield', section:'Acoustic Break', duration:296, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s25', title:'Fortunate Son', artist:'Creedence Clearwater Revival', section:'Set 2', duration:210, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s26', title:'Born to Be Wild', artist:'Steppenwolf', section:'Set 2', duration:210, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s27', title:'American Girl', artist:'Tom Petty', section:'Set 2', duration:212, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s28', title:'I\'ll Be There For You', artist:'The Rembrandts', section:'Set 2', duration:165, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s29', title:'Seven Nation Army', artist:'The White Stripes', section:'Set 2', duration:232, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s30', title:'Mississippi Queen', artist:'Mountain', section:'Set 2', duration:212, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s31', title:'What I Like About You', artist:'The Romantics', section:'Set 2', duration:157, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s32', title:'Runnin\' Down a Dream', artist:'Tom Petty', section:'Set 2', duration:262, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+];
+
+let songs = [];
+let votes = {}; // { songId: { voterName: score } }
+let myName = null;
+let editingId = null;
+let BUCKET_ID = '__NO_BUCKET__'; // auto-filled on first run; this exact line gets rewritten into the downloadable copy
+
+function fmtTime(sec){
+  sec = Math.max(0, Math.round(sec));
+  const m = Math.floor(sec/60), s = sec%60;
+  return m + ':' + String(s).padStart(2,'0');
+}
+
+function kvUrl(key){
+  return 'https://kvdb.io/' + BUCKET_ID + '/' + key;
+}
+
+async function kvGet(key){
+  const res = await fetch(kvUrl(key));
+  if(res.status === 404) return null;
+  if(!res.ok) throw new Error('kvdb get failed: ' + res.status);
+  return await res.text();
+}
+
+async function kvSet(key, value){
+  const res = await fetch(kvUrl(key), {
+    method: 'POST',
+    headers: {'Content-Type': 'text/plain'},
+    body: value
+  });
+  if(!res.ok) throw new Error('kvdb set failed: ' + res.status);
+}
+
+async function createBucket(){
+  const res = await fetch('https://kvdb.io/', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    body: 'email=band-setlist-board@example.com'
+  });
+  if(!res.ok) throw new Error('Could not create storage bucket: ' + res.status);
+  return (await res.text()).trim();
+}
+
+async function ensureBucket(){
+  const params = new URLSearchParams(location.search);
+  const fromUrl = params.get('b');
+  if(fromUrl){
+    BUCKET_ID = fromUrl;
+    return;
+  }
+  const banner = document.getElementById('setupBanner');
+  try{
+    const id = await createBucket();
+    BUCKET_ID = id;
+    const url = new URL(location.href);
+    url.searchParams.set('b', id);
+    history.replaceState(null, '', url);
+    if(banner){
+      banner.innerHTML = 'Board created! This page\'s link now has a unique ID in it — copy the address bar URL and send <b>that exact link</b> to your bandmates. Everyone who opens it will share the same votes.';
+      banner.style.display = 'block';
+    }
+  } catch(e){
+    if(banner){
+      banner.innerHTML = 'Could not set up shared storage — check your connection and reload the page to try again.';
+      banner.style.display = 'block';
+    }
+    throw e;
+  }
+}
+
+async function loadData(){
+  await ensureBucket();
+
+  try{
+    let sl = await kvGet('songlist');
+    if(sl){
+      songs = JSON.parse(sl);
+      // migrate: clear old performance notes on any of the originally preloaded songs
+      const defaultById = {};
+      DEFAULT_SONGS.forEach(d => defaultById[d.id] = d);
+      let changed = false;
+      songs.forEach(s => {
+        if(defaultById[s.id] && s.cue !== defaultById[s.id].cue){
+          s.cue = defaultById[s.id].cue;
+          changed = true;
+        }
+        if(typeof s.known !== 'boolean'){
+          s.known = defaultById[s.id] ? defaultById[s.id].known : true;
+          changed = true;
+        }
+        if(typeof s.needsToLearn !== 'boolean'){
+          s.needsToLearn = defaultById[s.id] ? defaultById[s.id].needsToLearn : !s.known;
+          changed = true;
+        }
+        if(typeof s.inPlaylist !== 'boolean'){
+          s.inPlaylist = defaultById[s.id] ? defaultById[s.id].inPlaylist : false;
+          changed = true;
+        }
+      });
+      if(changed) await kvSet('songlist', JSON.stringify(songs));
+    } else {
+      songs = DEFAULT_SONGS.slice();
+      await kvSet('songlist', JSON.stringify(songs));
+    }
+  } catch(e){
+    console.error('Could not load songs', e);
+    songs = DEFAULT_SONGS.slice();
+  }
+
+  try{
+    let av = await kvGet('all-votes');
+    votes = av ? JSON.parse(av) : {};
+  } catch(e){
+    console.error('Could not load votes', e);
+    votes = {};
+  }
+
+  try{
+    myName = localStorage.getItem('setlist-voter-name');
+  } catch(e){
+    myName = null;
+  }
+}
+
+async function saveSongs(){
+  try{ await kvSet('songlist', JSON.stringify(songs)); }
+  catch(e){ console.error('Could not save songs', e); }
+}
+async function saveVotes(){
+  try{ await kvSet('all-votes', JSON.stringify(votes)); }
+  catch(e){ console.error('Could not save votes', e); }
+}
+async function saveIdentity(name){
+  try{ localStorage.setItem('setlist-voter-name', name); }
+  catch(e){ console.error('Could not save identity', e); }
+}
+
+function avgFor(songId){
+  const v = votes[songId];
+  if(!v) return null;
+  const vals = Object.values(v);
+  if(vals.length === 0) return null;
+  return vals.reduce((a,b)=>a+b,0) / vals.length;
+}
+function countFor(songId){
+  const v = votes[songId];
+  return v ? Object.keys(v).length : 0;
+}
+function statusFor(avg){
+  if(avg === null) return {cls:'status-none', label:'Unrated'};
+  if(avg >= 3.5) return {cls:'status-in', label:'In'};
+  if(avg >= 2.5) return {cls:'status-maybe', label:'Maybe'};
+  return {cls:'status-out', label:'Out'};
+}
+
+function renderIdBar(){
+  const el = document.getElementById('idbar');
+  if(myName){
+    el.innerHTML = '';
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.innerHTML = 'Voting as <b>'+escapeHtml(myName)+'</b>';
+    const changeBtn = document.createElement('button');
+    changeBtn.textContent = 'change';
+    changeBtn.onclick = () => { myName = null; renderIdBar(); document.getElementById('nameOverlay').classList.add('show'); };
+    chip.appendChild(changeBtn);
+    el.appendChild(chip);
+  } else {
+    document.getElementById('nameOverlay').classList.add('show');
+    el.innerHTML = '<div class="chip">Set your name to start voting</div>';
+  }
+}
+
+function escapeHtml(s){
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function renderGauge(){
+  let total = 0;
+  songs.forEach(s => {
+    if(s.inPlaylist) total += s.duration;
+  });
+  const pct = Math.min(100, (total/TARGET_SECONDS)*100);
+  const fill = document.getElementById('gaugeFill');
+  fill.style.width = pct + '%';
+  fill.classList.toggle('over', total > TARGET_SECONDS);
+  document.getElementById('gaugeText').textContent = fmtTime(total) + ' / 120:00';
+}
+
+function render(){
+  renderIdBar();
+  renderGauge();
+  const main = document.getElementById('main');
+  main.innerHTML = '';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'section';
+
+  const head = document.createElement('div');
+  head.className = 'section-head';
+  let total = songs.reduce((a,s)=>a+s.duration,0);
+  head.innerHTML = '<h2>Song Pool</h2><span class="section-meta">'+songs.length+' songs · '+fmtTime(total)+' if all played</span>';
+  wrap.appendChild(head);
+
+  const sheet = document.createElement('div');
+  sheet.className = 'sheet';
+
+  const header = document.createElement('div');
+  header.className = 'row-header';
+  header.innerHTML = `
+    <span class="rh-num"></span>
+    <span class="rh-main">Song</span>
+    <span class="rh-know">Know it</span>
+    <span class="rh-learn">Learn?</span>
+    <span class="rh-playlist">Playlist</span>
+    <span class="rh-duration">Time</span>
+    <span class="rh-dots">Your score</span>
+    <span class="rh-avg">Avg</span>
+    <span class="rh-status">Status</span>
+    <span class="rh-spotify"></span>
+    <span class="rh-edit"></span>
+  `;
+  sheet.appendChild(header);
+
+  songs.forEach((s, idx) => {
+    sheet.appendChild(renderRow(s, idx+1));
+  });
+
+  const addRow = document.createElement('div');
+  addRow.className = 'add-row';
+  addRow.textContent = '+ Add a song';
+  addRow.onclick = () => openAddModal();
+  sheet.appendChild(addRow);
+
+  wrap.appendChild(sheet);
+  main.appendChild(wrap);
+}
+
+function renderRow(s, num){
+  const row = document.createElement('div');
+  row.className = 'row';
+
+  const avg = avgFor(s.id);
+  const cnt = countFor(s.id);
+  const st = statusFor(avg);
+  const myScore = (votes[s.id] && myName) ? votes[s.id][myName] : undefined;
+
+  row.innerHTML = `
+    <span class="row-num">${String(num).padStart(2,'0')}</span>
+    <div class="row-main">
+      <div class="row-title-line">
+        <span class="row-title">${escapeHtml(s.title)}</span>
+        <span class="row-artist">${escapeHtml(s.artist)}</span>
+        ${s.cue ? `<span class="cue">${escapeHtml(s.cue)}</span>` : ''}
+      </div>
+    </div>
+    <button class="know-col ${s.known ? 'is-on' : ''}" title="Click to toggle">${s.known ? '✓ Know' : 'Know'}</button>
+    <button class="learn-col ${s.needsToLearn ? 'is-on' : ''}" title="Click to toggle">${s.needsToLearn ? '✓ Learn' : 'Learn'}</button>
+    <button class="playlist-col ${s.inPlaylist ? 'is-on' : ''}" title="Click to toggle">${s.inPlaylist ? '✓ Playlist' : '+ Playlist'}</button>
+    <span class="row-duration">${fmtTime(s.duration)}</span>
+    <div class="row-dots" data-song="${s.id}"></div>
+    <span class="row-avg">${avg===null ? '—' : '<b>'+avg.toFixed(1)+'</b> avg · '+cnt+'v'}</span>
+    <span class="status-badge ${st.cls}">${st.label}</span>
+  `;
+
+  row.querySelector('.know-col').onclick = () => toggleFlag(s.id, 'known');
+  row.querySelector('.learn-col').onclick = () => toggleFlag(s.id, 'needsToLearn');
+  row.querySelector('.playlist-col').onclick = () => toggleFlag(s.id, 'inPlaylist');
+
+  const dotsWrap = row.querySelector('.row-dots');
+  for(let i=1;i<=5;i++){
+    const dot = document.createElement('button');
+    dot.className = 'dot' + (myScore === i ? ' active' : '');
+    dot.textContent = i;
+    dot.onclick = () => castVote(s.id, i);
+    dotsWrap.appendChild(dot);
+  }
+
+  const spotifyBtn = document.createElement('button');
+  spotifyBtn.className = 'spotify-btn';
+  spotifyBtn.title = 'Search on Spotify';
+  spotifyBtn.textContent = '♫';
+  spotifyBtn.onclick = () => {
+    const q = encodeURIComponent(s.title + ' ' + s.artist);
+    window.open('https://open.spotify.com/search/' + q, '_blank');
+  };
+  row.appendChild(spotifyBtn);
+
+  const editBtn = document.createElement('button');
+  editBtn.className = 'edit-btn';
+  editBtn.title = 'Edit song';
+  editBtn.textContent = '✎';
+  editBtn.onclick = () => openAddModal(s);
+  row.appendChild(editBtn);
+
+  return row;
+}
+
+async function toggleFlag(songId, field){
+  const song = songs.find(s => s.id === songId);
+  if(!song) return;
+  song[field] = !song[field];
+  render();
+  await saveSongs();
+}
+
+async function castVote(songId, score){
+  if(!myName){
+    document.getElementById('nameOverlay').classList.add('show');
+    return;
+  }
+  if(!votes[songId]) votes[songId] = {};
+  // toggle off if clicking same score again
+  if(votes[songId][myName] === score){
+    delete votes[songId][myName];
+  } else {
+    votes[songId][myName] = score;
+  }
+  render();
+  await saveVotes();
+}
+
+function parseDuration(str){
+  if(!str) return 240;
+  const parts = str.split(':');
+  if(parts.length === 2){
+    const m = parseInt(parts[0],10) || 0;
+    const s = parseInt(parts[1],10) || 0;
+    return m*60+s;
+  }
+  const n = parseInt(str,10);
+  return isNaN(n) ? 240 : n*60;
+}
+
+function openAddModal(existing){
+  editingId = existing ? existing.id : null;
+  document.getElementById('modalTitle').textContent = existing ? 'Edit song' : 'Add a song';
+  document.getElementById('f-title').value = existing ? existing.title : '';
+  document.getElementById('f-artist').value = existing ? existing.artist : '';
+  document.getElementById('f-duration').value = existing ? fmtTime(existing.duration) : '';
+  document.getElementById('f-cue').value = existing ? (existing.cue || '') : '';
+  document.getElementById('f-known').checked = existing ? !!existing.known : false;
+  document.getElementById('f-needslearn').checked = existing ? !!existing.needsToLearn : false;
+  document.getElementById('f-playlist').checked = existing ? !!existing.inPlaylist : false;
+  document.getElementById('f-save').textContent = existing ? 'Save changes' : 'Add song';
+  document.getElementById('f-delete').style.display = existing ? 'inline-block' : 'none';
+  document.getElementById('addOverlay').classList.add('show');
+  document.getElementById('f-title').focus();
+}
+
+document.getElementById('f-cancel').onclick = () => {
+  document.getElementById('addOverlay').classList.remove('show');
+};
+
+document.getElementById('f-save').onclick = async () => {
+  const title = document.getElementById('f-title').value.trim();
+  if(!title) { document.getElementById('f-title').focus(); return; }
+  const artist = document.getElementById('f-artist').value.trim();
+  const duration = parseDuration(document.getElementById('f-duration').value.trim());
+  const cue = document.getElementById('f-cue').value.trim();
+  const known = document.getElementById('f-known').checked;
+  const needsToLearn = document.getElementById('f-needslearn').checked;
+  const inPlaylist = document.getElementById('f-playlist').checked;
+
+  if(editingId){
+    const song = songs.find(s => s.id === editingId);
+    if(song){
+      song.title = title; song.artist = artist; song.duration = duration;
+      song.cue = cue; song.known = known; song.needsToLearn = needsToLearn;
+      song.inPlaylist = inPlaylist;
+    }
+  } else {
+    const id = 'song-' + Date.now() + '-' + Math.floor(Math.random()*1000);
+    songs.push({id, title, artist, section:'All', duration, cue, known, needsToLearn, inPlaylist});
+  }
+  document.getElementById('addOverlay').classList.remove('show');
+  editingId = null;
+  render();
+  await saveSongs();
+};
+
+document.getElementById('f-delete').onclick = async () => {
+  if(!editingId) return;
+  if(!confirm('Remove this song from the list for everyone?')) return;
+  songs = songs.filter(s => s.id !== editingId);
+  delete votes[editingId];
+  document.getElementById('addOverlay').classList.remove('show');
+  editingId = null;
+  render();
+  await saveSongs();
+  await saveVotes();
+};
+
+document.getElementById('f-name-save').onclick = async () => {
+  const name = document.getElementById('f-name').value.trim();
+  if(!name) { document.getElementById('f-name').focus(); return; }
+  myName = name;
+  document.getElementById('nameOverlay').classList.remove('show');
+  await saveIdentity(name);
+  render();
+};
+document.getElementById('f-name').addEventListener('keydown', e => {
+  if(e.key === 'Enter') document.getElementById('f-name-save').click();
+});
+
+document.getElementById('resetBtn').onclick = async () => {
+  if(!confirm('This clears the song list and every vote for everyone using this board. Continue?')) return;
+  songs = DEFAULT_SONGS.slice();
+  votes = {};
+  render();
+  await saveSongs();
+  await saveVotes();
+};
+
+(async function init(){
+  await loadData();
+  render();
+})();
+</script>
+
+
+</body></html>
