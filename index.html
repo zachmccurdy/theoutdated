@@ -667,14 +667,25 @@ async function fbSet(path, data){
 
 async function loadData(){
   try{
-    const data = await fbGet('board');
-    songs = (data && Array.isArray(data.songs)) ? data.songs : DEFAULT_SONGS.slice();
-    votes = (data && data.votes) ? data.votes : {};
+    let songsData = await fbGet('songs');
+    let votesData = await fbGet('votes');
+
+    // one-time migration from the earlier combined "board" path, if present
+    if(songsData === null && votesData === null){
+      const legacy = await fbGet('board');
+      if(legacy){
+        songsData = Array.isArray(legacy.songs) ? legacy.songs : null;
+        votesData = legacy.votes || null;
+      }
+    }
+
+    songs = Array.isArray(songsData) ? songsData : DEFAULT_SONGS.slice();
+    votes = votesData || {};
 
     // migrate: clear old performance notes / backfill new fields on originally preloaded songs
     const defaultById = {};
     DEFAULT_SONGS.forEach(d => defaultById[d.id] = d);
-    let changed = !data;
+    let changed = !Array.isArray(songsData);
     songs.forEach(s => {
       if(defaultById[s.id] && s.cue !== defaultById[s.id].cue){
         s.cue = defaultById[s.id].cue;
@@ -693,7 +704,8 @@ async function loadData(){
         changed = true;
       }
     });
-    if(changed) await fbSet('board', {songs, votes});
+    if(changed) await fbSet('songs', songs);
+    if(!votesData) await fbSet('votes', votes);
   } catch(e){
     console.error('Could not load data', e);
     const banner = document.getElementById('setupBanner');
@@ -722,12 +734,31 @@ function showSaveError(context){
   }
 }
 
-async function saveAll(context){
-  try{ await fbSet('board', {songs, votes}); }
-  catch(e){ console.error('Could not save', e); showSaveError(context); }
+// Fetches the latest songs from the server, applies `mutator` to that fresh
+// copy, writes it back, and syncs local state — so a change made elsewhere
+// in the meantime (e.g. a bandmate adding a song) never gets clobbered.
+async function withFreshSongs(mutator){
+  let latest;
+  try{ latest = await fbGet('songs'); } catch(e){ latest = null; }
+  if(!Array.isArray(latest)) latest = songs.slice();
+  mutator(latest);
+  songs = latest;
+  try{ await fbSet('songs', songs); }
+  catch(e){ console.error('Could not save songs', e); showSaveError('song list'); }
+  render();
 }
-async function saveSongs(){ await saveAll('song list'); }
-async function saveVotes(){ await saveAll('vote'); }
+
+async function withFreshVotes(mutator){
+  let latest;
+  try{ latest = await fbGet('votes'); } catch(e){ latest = null; }
+  if(!latest || typeof latest !== 'object') latest = JSON.parse(JSON.stringify(votes));
+  mutator(latest);
+  votes = latest;
+  try{ await fbSet('votes', votes); }
+  catch(e){ console.error('Could not save votes', e); showSaveError('vote'); }
+  render();
+}
+
 async function saveIdentity(name){
   try{ localStorage.setItem('setlist-voter-name', name); }
   catch(e){ console.error('Could not save identity', e); }
@@ -899,9 +930,13 @@ function renderRow(s, num){
 async function toggleFlag(songId, field){
   const song = songs.find(s => s.id === songId);
   if(!song) return;
-  song[field] = !song[field];
+  const newVal = !song[field];
+  song[field] = newVal;
   render();
-  await saveSongs();
+  await withFreshSongs(latest => {
+    const s = latest.find(x => x.id === songId);
+    if(s) s[field] = newVal;
+  });
 }
 
 async function castVote(songId, score){
@@ -911,13 +946,21 @@ async function castVote(songId, score){
   }
   if(!votes[songId]) votes[songId] = {};
   // toggle off if clicking same score again
+  let newScore;
   if(votes[songId][myName] === score){
     delete votes[songId][myName];
+    newScore = undefined;
   } else {
     votes[songId][myName] = score;
+    newScore = score;
   }
   render();
-  await saveVotes();
+  await withFreshVotes(latest => {
+    if(!latest[songId]) latest[songId] = {};
+    if(newScore === undefined) delete latest[songId][myName];
+    else latest[songId][myName] = newScore;
+    if(Object.keys(latest[songId]).length === 0) delete latest[songId];
+  });
 }
 
 function parseDuration(str){
@@ -963,34 +1006,51 @@ document.getElementById('f-save').onclick = async () => {
   const known = document.getElementById('f-known').checked;
   const needsToLearn = document.getElementById('f-needslearn').checked;
   const inPlaylist = document.getElementById('f-playlist').checked;
+  const wasEditingId = editingId;
 
-  if(editingId){
-    const song = songs.find(s => s.id === editingId);
+  if(wasEditingId){
+    const song = songs.find(s => s.id === wasEditingId);
     if(song){
       song.title = title; song.artist = artist; song.duration = duration;
       song.cue = cue; song.known = known; song.needsToLearn = needsToLearn;
       song.inPlaylist = inPlaylist;
     }
   } else {
-    const id = 'song-' + Date.now() + '-' + Math.floor(Math.random()*1000);
-    songs.push({id, title, artist, section:'All', duration, cue, known, needsToLearn, inPlaylist});
+    var newId = 'song-' + Date.now() + '-' + Math.floor(Math.random()*1000);
+    songs.push({id:newId, title, artist, section:'All', duration, cue, known, needsToLearn, inPlaylist});
   }
   document.getElementById('addOverlay').classList.remove('show');
   editingId = null;
   render();
-  await saveSongs();
+
+  await withFreshSongs(latest => {
+    if(wasEditingId){
+      const s = latest.find(x => x.id === wasEditingId);
+      if(s){
+        s.title = title; s.artist = artist; s.duration = duration;
+        s.cue = cue; s.known = known; s.needsToLearn = needsToLearn;
+        s.inPlaylist = inPlaylist;
+      }
+    } else {
+      latest.push({id:newId, title, artist, section:'All', duration, cue, known, needsToLearn, inPlaylist});
+    }
+  });
 };
 
 document.getElementById('f-delete').onclick = async () => {
   if(!editingId) return;
   if(!confirm('Remove this song from the list for everyone?')) return;
-  songs = songs.filter(s => s.id !== editingId);
-  delete votes[editingId];
+  const deletedId = editingId;
+  songs = songs.filter(s => s.id !== deletedId);
+  delete votes[deletedId];
   document.getElementById('addOverlay').classList.remove('show');
   editingId = null;
   render();
-  await saveSongs();
-  await saveVotes();
+  await withFreshSongs(latest => {
+    const idx = latest.findIndex(x => x.id === deletedId);
+    if(idx > -1) latest.splice(idx, 1);
+  });
+  await withFreshVotes(latest => { delete latest[deletedId]; });
 };
 
 document.getElementById('f-name-save').onclick = async () => {
@@ -1010,8 +1070,8 @@ document.getElementById('resetBtn').onclick = async () => {
   songs = DEFAULT_SONGS.slice();
   votes = {};
   render();
-  await saveSongs();
-  await saveVotes();
+  try{ await fbSet('songs', songs); await fbSet('votes', votes); }
+  catch(e){ console.error('Could not reset', e); showSaveError('reset'); }
 };
 
 (async function init(){
