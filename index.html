@@ -494,6 +494,59 @@
     box-shadow:0 4px 14px rgba(232,163,61,0.25);
   }
   .top-cta .btn:hover{ box-shadow:0 6px 18px rgba(232,163,61,0.35); }
+
+  .voter-progress-wrap{
+    max-width:640px;
+    margin:20px auto 0;
+    padding:0 20px;
+    text-align:center;
+  }
+  .voter-progress-label{
+    font-family:'Oswald',sans-serif;
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--text-faint);
+    margin-bottom:10px;
+  }
+  .voter-progress{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    justify-content:center;
+  }
+  .voter-chip{
+    background:var(--stage-black-2);
+    border:1px solid var(--stage-black-3);
+    border-radius:8px;
+    padding:8px 14px;
+    min-width:110px;
+    text-align:left;
+  }
+  .voter-chip-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    gap:10px;
+  }
+  .voter-name{
+    font-family:'Oswald',sans-serif;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    color:var(--text-light);
+  }
+  .voter-chip.done .voter-name::after{ content:' \2713'; color:var(--green); }
+  .voter-frac{ font-size:11px; color:var(--text-dim); }
+  .voter-bar{
+    height:4px;
+    background:var(--stage-black-3);
+    border-radius:2px;
+    margin-top:6px;
+    overflow:hidden;
+  }
+  .voter-bar-fill{ height:100%; background:var(--amber); }
+  .voter-chip.done .voter-bar-fill{ background:var(--green); }
 </style>
 </head>
 <body>
@@ -522,6 +575,11 @@
 </div>
 
 <div class="idbar" id="idbar"></div>
+
+<div class="voter-progress-wrap" id="voterProgressWrap" style="display:none;">
+  <div class="voter-progress-label">Who's voted</div>
+  <div class="voter-progress" id="voterProgress"></div>
+</div>
 
 <main id="main">
   <div class="loading-msg">Loading the setlist…</div>
@@ -818,9 +876,44 @@ function renderGauge(){
   document.getElementById('gaugeText').textContent = fmtTime(total) + ' / 120:00';
 }
 
+function renderVoterProgress(){
+  const wrap = document.getElementById('voterProgressWrap');
+  const container = document.getElementById('voterProgress');
+  if(!wrap || !container) return;
+
+  const counts = {}; // voter name -> number of songs they've rated
+  Object.values(votes).forEach(voteMap => {
+    Object.keys(voteMap).forEach(name => {
+      counts[name] = (counts[name] || 0) + 1;
+    });
+  });
+
+  const names = Object.keys(counts).sort((a, b) => a.localeCompare(b));
+  if(names.length === 0){
+    wrap.style.display = 'none';
+    return;
+  }
+  wrap.style.display = 'block';
+
+  const total = songs.length;
+  container.innerHTML = names.map(name => {
+    const count = counts[name];
+    const pct = total ? Math.min(100, Math.round((count / total) * 100)) : 0;
+    const done = total > 0 && count >= total;
+    return '<div class="voter-chip' + (done ? ' done' : '') + '">'
+      + '<div class="voter-chip-top">'
+      + '<span class="voter-name">' + escapeHtml(name) + '</span>'
+      + '<span class="voter-frac">' + count + '/' + total + '</span>'
+      + '</div>'
+      + '<div class="voter-bar"><div class="voter-bar-fill" style="width:' + pct + '%"></div></div>'
+      + '</div>';
+  }).join('');
+}
+
 function render(){
   renderIdBar();
   renderGauge();
+  renderVoterProgress();
   const main = document.getElementById('main');
   main.innerHTML = '';
 
