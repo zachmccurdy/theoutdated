@@ -551,6 +551,105 @@
   }
   .voter-bar-fill{ height:100%; background:var(--amber); }
   .voter-chip.done .voter-bar-fill{ background:var(--green); }
+
+  .tabs{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    max-width:640px;
+    margin:18px auto 0;
+    padding:0 20px;
+  }
+  .tab-btn{
+    background:transparent;
+    border:1px solid var(--stage-black-3);
+    color:var(--text-dim);
+    font-family:'Oswald',sans-serif;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    font-size:12.5px;
+    padding:9px 20px;
+    border-radius:20px;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .tab-btn:hover{ color:var(--text-light); border-color:var(--amber-dim); }
+  .tab-btn.active{
+    background:var(--amber);
+    color:var(--stage-black);
+    border-color:var(--amber);
+    font-weight:600;
+  }
+
+  .report-wrap{
+    max-width:1100px;
+    margin:0 auto;
+    padding:30px 20px 0;
+  }
+  .report-head{
+    display:flex;
+    align-items:baseline;
+    gap:14px;
+    margin-bottom:16px;
+    border-bottom:1px dashed var(--stage-black-3);
+    padding-bottom:10px;
+  }
+  .report-head h2{
+    font-family:'Kalam',cursive;
+    font-weight:700;
+    font-size:26px;
+    color:var(--paper);
+    margin:0;
+    transform:rotate(-1deg);
+  }
+  .report-table-wrap{
+    background:linear-gradient(180deg, var(--paper), var(--paper-dim));
+    border-radius:3px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(0,0,0,0.05);
+    overflow-x:auto;
+  }
+  .report-table{
+    width:100%;
+    border-collapse:collapse;
+    color:#1c1710;
+    font-size:13px;
+  }
+  .report-table thead th{
+    text-align:left;
+    padding:12px 14px;
+    font-family:'Oswald',sans-serif;
+    font-size:10.5px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:#6b6250;
+    border-bottom:1px solid rgba(0,0,0,0.14);
+    cursor:pointer;
+    white-space:nowrap;
+    user-select:none;
+  }
+  .report-table thead th:hover{ color:#2a2412; }
+  .report-table thead th.sorted::after{
+    content:' \25B2';
+    font-size:9px;
+  }
+  .report-table thead th.sorted.desc::after{
+    content:' \25BC';
+  }
+  .report-table tbody tr{ border-bottom:1px dashed rgba(0,0,0,0.1); }
+  .report-table tbody tr:last-child{ border-bottom:none; }
+  .report-table tbody tr:hover{ background:rgba(0,0,0,0.03); }
+  .report-table td{
+    padding:10px 14px;
+    white-space:nowrap;
+  }
+  .report-table td.title-cell{ font-family:'Oswald',sans-serif; font-weight:600; white-space:normal; }
+  .report-table td.artist-cell{ color:#6b6250; font-size:12px; }
+  .report-table td.avg-cell{ font-weight:700; }
+  .report-table .rmini{
+    font-size:10px; font-weight:700; padding:2px 6px; border-radius:8px;
+  }
+  .rmini.yes{ background:rgba(99,161,95,0.18); color:#3f6b3c; }
+  .rmini.no{ background:transparent; color:#a89f8a; }
 </style>
 </head>
 <body>
@@ -574,20 +673,55 @@
 
 <div class="setup-banner" id="setupBanner"></div>
 
-<div class="top-cta">
-  <button class="btn" id="topAddBtn">+ Add a Song</button>
+<div class="tabs">
+  <button class="tab-btn active" id="tabBoardBtn">Board</button>
+  <button class="tab-btn" id="tabReportBtn">Report</button>
 </div>
 
-<div class="idbar" id="idbar"></div>
+<div id="boardView">
+  <div class="top-cta">
+    <button class="btn" id="topAddBtn">+ Add a Song</button>
+  </div>
 
-<div class="voter-progress-wrap" id="voterProgressWrap" style="display:none;">
-  <div class="voter-progress-label">Who's voted</div>
-  <div class="voter-progress" id="voterProgress"></div>
+  <div class="idbar" id="idbar"></div>
+
+  <div class="voter-progress-wrap" id="voterProgressWrap" style="display:none;">
+    <div class="voter-progress-label">Who's voted</div>
+    <div class="voter-progress" id="voterProgress"></div>
+  </div>
+
+  <main id="main">
+    <div class="loading-msg">Loading the setlist…</div>
+  </main>
 </div>
 
-<main id="main">
-  <div class="loading-msg">Loading the setlist…</div>
-</main>
+<div id="reportView" style="display:none;">
+  <div class="report-wrap">
+    <div class="report-head">
+      <h2>Ratings Report</h2>
+      <span class="section-meta" id="reportMeta"></span>
+    </div>
+    <div class="report-table-wrap">
+      <table class="report-table" id="reportTable">
+        <thead>
+          <tr>
+            <th data-sort="num">#</th>
+            <th data-sort="title">Song</th>
+            <th data-sort="artist">Artist</th>
+            <th data-sort="avg">Avg</th>
+            <th data-sort="votes">Votes</th>
+            <th data-sort="duration">Time</th>
+            <th data-sort="known">Know</th>
+            <th data-sort="learn">Learn</th>
+            <th data-sort="playlist">Playlist</th>
+            <th data-sort="status">Status</th>
+          </tr>
+        </thead>
+        <tbody id="reportBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
 <footer>
   Data is shared with everyone using this board. &nbsp;·&nbsp;
@@ -966,6 +1100,10 @@ function render(){
 
   wrap.appendChild(sheet);
   main.appendChild(wrap);
+
+  if(document.getElementById('reportView').style.display !== 'none'){
+    renderReport();
+  }
 }
 
 function renderRow(s, num){
@@ -1216,6 +1354,96 @@ document.getElementById('resetBtn').onclick = async () => {
   try{ await fbSet('songs', songs); await fbSet('votes', votes); }
   catch(e){ console.error('Could not reset', e); showSaveError('reset'); }
 };
+
+// ---- Tabs ----
+document.getElementById('tabBoardBtn').onclick = () => switchTab('board');
+document.getElementById('tabReportBtn').onclick = () => switchTab('report');
+
+function switchTab(tab){
+  document.getElementById('boardView').style.display = tab === 'board' ? 'block' : 'none';
+  document.getElementById('reportView').style.display = tab === 'report' ? 'block' : 'none';
+  document.getElementById('tabBoardBtn').classList.toggle('active', tab === 'board');
+  document.getElementById('tabReportBtn').classList.toggle('active', tab === 'report');
+  if(tab === 'report') renderReport();
+}
+
+// ---- Report ----
+let reportSort = {field: 'avg', dir: 'desc'};
+
+document.querySelectorAll('#reportTable thead th').forEach(th => {
+  th.addEventListener('click', () => {
+    const field = th.getAttribute('data-sort');
+    if(reportSort.field === field){
+      reportSort.dir = reportSort.dir === 'desc' ? 'asc' : 'desc';
+    } else {
+      reportSort.field = field;
+      // sensible default direction per field
+      reportSort.dir = (field === 'title' || field === 'artist') ? 'asc' : 'desc';
+    }
+    renderReport();
+  });
+});
+
+function renderReport(){
+  const tbody = document.getElementById('reportBody');
+  const meta = document.getElementById('reportMeta');
+  if(!tbody) return;
+
+  const rows = songs.map((s, idx) => {
+    const avg = avgFor(s.id);
+    const cnt = countFor(s.id);
+    return {song: s, origIndex: idx, avg, cnt};
+  });
+
+  const dirMul = reportSort.dir === 'asc' ? 1 : -1;
+  rows.sort((a, b) => {
+    let av, bv;
+    switch(reportSort.field){
+      case 'title': av = a.song.title.toLowerCase(); bv = b.song.title.toLowerCase(); break;
+      case 'artist': av = a.song.artist.toLowerCase(); bv = b.song.artist.toLowerCase(); break;
+      case 'duration': av = a.song.duration; bv = b.song.duration; break;
+      case 'votes': av = a.cnt; bv = b.cnt; break;
+      case 'known': av = a.song.known ? 1 : 0; bv = b.song.known ? 1 : 0; break;
+      case 'learn': av = a.song.needsToLearn ? 1 : 0; bv = b.song.needsToLearn ? 1 : 0; break;
+      case 'playlist': av = a.song.inPlaylist ? 1 : 0; bv = b.song.inPlaylist ? 1 : 0; break;
+      case 'status': av = a.avg === null ? -1 : a.avg; bv = b.avg === null ? -1 : b.avg; break;
+      case 'num': av = a.origIndex; bv = b.origIndex; break;
+      case 'avg':
+      default:
+        // unrated songs always sink to the bottom regardless of direction
+        av = a.avg === null ? -1 : a.avg;
+        bv = b.avg === null ? -1 : b.avg;
+        break;
+    }
+    if(av < bv) return -1 * dirMul;
+    if(av > bv) return 1 * dirMul;
+    return a.origIndex - b.origIndex;
+  });
+
+  document.querySelectorAll('#reportTable thead th').forEach(th => {
+    th.classList.toggle('sorted', th.getAttribute('data-sort') === reportSort.field);
+    th.classList.toggle('desc', reportSort.dir === 'desc');
+  });
+
+  tbody.innerHTML = rows.map((r, i) => {
+    const s = r.song;
+    const st = statusFor(r.avg);
+    return '<tr>'
+      + '<td>' + (i + 1) + '</td>'
+      + '<td class="title-cell">' + escapeHtml(s.title) + '</td>'
+      + '<td class="artist-cell">' + escapeHtml(s.artist) + '</td>'
+      + '<td class="avg-cell">' + (r.avg === null ? '—' : r.avg.toFixed(1)) + '</td>'
+      + '<td>' + r.cnt + '</td>'
+      + '<td>' + fmtTime(s.duration) + '</td>'
+      + '<td><span class="rmini ' + (s.known ? 'yes' : 'no') + '">' + (s.known ? 'Yes' : '—') + '</span></td>'
+      + '<td><span class="rmini ' + (s.needsToLearn ? 'yes' : 'no') + '">' + (s.needsToLearn ? 'Yes' : '—') + '</span></td>'
+      + '<td><span class="rmini ' + (s.inPlaylist ? 'yes' : 'no') + '">' + (s.inPlaylist ? 'Yes' : '—') + '</span></td>'
+      + '<td><span class="status-badge ' + st.cls + '">' + st.label + '</span></td>'
+      + '</tr>';
+  }).join('');
+
+  meta.textContent = songs.length + ' songs';
+}
 
 (async function init(){
   await loadData();
