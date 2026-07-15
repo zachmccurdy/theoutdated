@@ -247,7 +247,7 @@
     padding:1px 7px;
     border-radius:2px;
   }
-  .know-col, .learn-col, .playlist-col{
+  .know-col, .learn-col, .playlist-col, .blocked-col{
     font-family:'Space Grotesk',sans-serif;
     font-size:10.5px;
     font-weight:600;
@@ -265,10 +265,23 @@
     transition:all .15s ease;
   }
   .playlist-col{ width:68px; }
-  .know-col:hover, .learn-col:hover, .playlist-col:hover{ border-color:#3a3122; }
+  .blocked-col{ width:78px; }
+  .know-col:hover, .learn-col:hover, .playlist-col:hover, .blocked-col:hover{ border-color:#3a3122; }
   .know-col.is-on{ color:#3f6b3c; background:rgba(99,161,95,0.18); border-color:transparent; }
   .learn-col.is-on{ color:#a1442f; background:rgba(193,90,72,0.18); border-color:transparent; }
   .playlist-col.is-on{ color:#8a611c; background:rgba(232,163,61,0.22); border-color:transparent; font-weight:700; }
+  .blocked-col.is-on{ color:#f2ede0; background:#4a4038; border-color:transparent; font-weight:700; }
+
+  .blocked-tag{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:11px;
+    font-weight:600;
+    color:#7a2f22;
+    background:rgba(161,68,47,0.14);
+    display:inline-block;
+    padding:1px 8px;
+    border-radius:2px;
+  }
 
   .edit-btn{
     flex-shrink:0;
@@ -300,6 +313,7 @@
   .row-header .rh-know{ width:52px; flex-shrink:0; text-align:center; }
   .row-header .rh-learn{ width:52px; flex-shrink:0; text-align:center; }
   .row-header .rh-playlist{ width:68px; flex-shrink:0; text-align:center; }
+  .row-header .rh-blocked{ width:76px; flex-shrink:0; text-align:center; }
   .row-header .rh-duration{ width:40px; flex-shrink:0; text-align:right; }
   .row-header .rh-dots{ width:134px; flex-shrink:0; }
   .row-header .rh-avg{ width:78px; flex-shrink:0; text-align:right; }
@@ -392,6 +406,7 @@
     .know-col{ order:2; }
     .learn-col{ order:2; }
     .playlist-col{ order:2; }
+    .blocked-col{ order:2; }
     .row-duration{ order:3; }
     .row-dots{ order:4; }
     .row-avg{ order:5; }
@@ -661,6 +676,7 @@
   .report-table .rmini-btn:hover{ border-color:#3a3122; }
   .report-table .rmini-btn.yes{ background:rgba(99,161,95,0.18); color:#3f6b3c; border-color:transparent; }
   .report-table .rmini-btn.playlist.yes{ background:rgba(232,163,61,0.22); color:#8a611c; border-color:transparent; font-weight:700; }
+  .report-table .rmini-btn.blocked.yes{ background:#4a4038; color:#f2ede0; border-color:transparent; font-weight:700; }
 </style>
 </head>
 <body>
@@ -725,6 +741,7 @@
             <th data-sort="known">Know</th>
             <th data-sort="learn">Learn</th>
             <th data-sort="playlist">Playlist</th>
+            <th data-sort="blocked">Blocked?</th>
             <th data-sort="status">Status</th>
           </tr>
         </thead>
@@ -780,6 +797,16 @@
         <span>Add to this show's playlist</span>
       </label>
     </div>
+    <div class="field checkbox-field">
+      <label class="checkbox-label">
+        <input id="f-notfeasible" type="checkbox">
+        <span>Not possible right now (too complex / missing instrument)</span>
+      </label>
+    </div>
+    <div class="field">
+      <label>Why not possible? (optional)</label>
+      <input id="f-notfeasible-reason" type="text" placeholder="e.g. needs a horn section">
+    </div>
     <div class="modal-actions">
       <button class="btn ghost small" id="f-delete" style="display:none; margin-right:auto; color:var(--red);">Delete song</button>
       <button class="btn ghost small" id="f-cancel">Cancel</button>
@@ -806,38 +833,38 @@ const TARGET_SECONDS = 120*60;
 const SECTIONS = ["Set 1","Acoustic Break","Set 2"];
 
 const DEFAULT_SONGS = [
-  {id:'s1',  title:'Gimme Three Steps', artist:'Lynyrd Skynyrd', section:'Set 1', duration:272, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s2',  title:'Slow Ride', artist:'Foghat', section:'Set 1', duration:281, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s3',  title:'All Right Now', artist:'Free', section:'Set 1', duration:360, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s4',  title:'Hurts So Good', artist:'John Mellencamp', section:'Set 1', duration:217, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s5',  title:'Surrender', artist:'Cheap Trick', section:'Set 1', duration:161, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s6',  title:'Sweet Home Chicago', artist:'Blues Brothers', section:'Set 1', duration:300, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s7',  title:'Sweet Home Alabama', artist:'Lynyrd Skynyrd', section:'Set 1', duration:283, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s8',  title:'Come and Get Your Love', artist:'Redbone', section:'Set 1', duration:227, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s9',  title:'Feel Like Makin\' Love', artist:'Bad Company', section:'Set 1', duration:314, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s10', title:'Bad Moon Rising', artist:'Creedence Clearwater Revival', section:'Set 1', duration:140, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s11', title:'Can\'t You See', artist:'The Marshall Tucker Band', section:'Set 1', duration:278, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s12', title:'Free Fallin\'', artist:'Tom Petty', section:'Set 1', duration:255, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s13', title:'Brown Eyed Girl', artist:'Van Morrison', section:'Set 1', duration:187, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s14', title:'For What It\'s Worth', artist:'Buffalo Springfield', section:'Set 1', duration:157, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s15', title:'Take Me Home, Country Roads', artist:'John Denver', section:'Set 1', duration:190, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s16', title:'Learning to Fly', artist:'Tom Petty', section:'Set 1', duration:240, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s17', title:'Wagon Wheel', artist:'Old Crow Medicine Show', section:'Set 1', duration:274, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s18', title:'Tennessee Whiskey', artist:'Chris Stapleton', section:'Acoustic Break', duration:287, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s19', title:'Hold On Loosely', artist:'.38 Special', section:'Acoustic Break', duration:232, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s20', title:'I Won\'t Back Down', artist:'Tom Petty', section:'Acoustic Break', duration:177, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s21', title:'Just What I Needed', artist:'The Cars', section:'Acoustic Break', duration:221, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s22', title:'The Middle', artist:'Jimmy Eat World', section:'Acoustic Break', duration:165, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s23', title:'Radar Love', artist:'Golden Earring', section:'Acoustic Break', duration:390, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s24', title:'Your Love', artist:'The Outfield', section:'Acoustic Break', duration:296, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s25', title:'Fortunate Son', artist:'Creedence Clearwater Revival', section:'Set 2', duration:210, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s26', title:'Born to Be Wild', artist:'Steppenwolf', section:'Set 2', duration:210, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s27', title:'American Girl', artist:'Tom Petty', section:'Set 2', duration:212, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s28', title:'I\'ll Be There For You', artist:'The Rembrandts', section:'Set 2', duration:165, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s29', title:'Seven Nation Army', artist:'The White Stripes', section:'Set 2', duration:232, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s30', title:'Mississippi Queen', artist:'Mountain', section:'Set 2', duration:212, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s31', title:'What I Like About You', artist:'The Romantics', section:'Set 2', duration:157, cue:'', known:true, needsToLearn:false, inPlaylist:false},
-  {id:'s32', title:'Runnin\' Down a Dream', artist:'Tom Petty', section:'Set 2', duration:262, cue:'', known:true, needsToLearn:false, inPlaylist:false},
+  {id:'s1',  title:'Gimme Three Steps', artist:'Lynyrd Skynyrd', section:'Set 1', duration:272, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s2',  title:'Slow Ride', artist:'Foghat', section:'Set 1', duration:281, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s3',  title:'All Right Now', artist:'Free', section:'Set 1', duration:360, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s4',  title:'Hurts So Good', artist:'John Mellencamp', section:'Set 1', duration:217, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s5',  title:'Surrender', artist:'Cheap Trick', section:'Set 1', duration:161, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s6',  title:'Sweet Home Chicago', artist:'Blues Brothers', section:'Set 1', duration:300, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s7',  title:'Sweet Home Alabama', artist:'Lynyrd Skynyrd', section:'Set 1', duration:283, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s8',  title:'Come and Get Your Love', artist:'Redbone', section:'Set 1', duration:227, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s9',  title:'Feel Like Makin\' Love', artist:'Bad Company', section:'Set 1', duration:314, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s10', title:'Bad Moon Rising', artist:'Creedence Clearwater Revival', section:'Set 1', duration:140, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s11', title:'Can\'t You See', artist:'The Marshall Tucker Band', section:'Set 1', duration:278, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s12', title:'Free Fallin\'', artist:'Tom Petty', section:'Set 1', duration:255, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s13', title:'Brown Eyed Girl', artist:'Van Morrison', section:'Set 1', duration:187, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s14', title:'For What It\'s Worth', artist:'Buffalo Springfield', section:'Set 1', duration:157, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s15', title:'Take Me Home, Country Roads', artist:'John Denver', section:'Set 1', duration:190, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s16', title:'Learning to Fly', artist:'Tom Petty', section:'Set 1', duration:240, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s17', title:'Wagon Wheel', artist:'Old Crow Medicine Show', section:'Set 1', duration:274, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s18', title:'Tennessee Whiskey', artist:'Chris Stapleton', section:'Acoustic Break', duration:287, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s19', title:'Hold On Loosely', artist:'.38 Special', section:'Acoustic Break', duration:232, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s20', title:'I Won\'t Back Down', artist:'Tom Petty', section:'Acoustic Break', duration:177, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s21', title:'Just What I Needed', artist:'The Cars', section:'Acoustic Break', duration:221, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s22', title:'The Middle', artist:'Jimmy Eat World', section:'Acoustic Break', duration:165, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s23', title:'Radar Love', artist:'Golden Earring', section:'Acoustic Break', duration:390, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s24', title:'Your Love', artist:'The Outfield', section:'Acoustic Break', duration:296, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s25', title:'Fortunate Son', artist:'Creedence Clearwater Revival', section:'Set 2', duration:210, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s26', title:'Born to Be Wild', artist:'Steppenwolf', section:'Set 2', duration:210, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s27', title:'American Girl', artist:'Tom Petty', section:'Set 2', duration:212, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s28', title:'I\'ll Be There For You', artist:'The Rembrandts', section:'Set 2', duration:165, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s29', title:'Seven Nation Army', artist:'The White Stripes', section:'Set 2', duration:232, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s30', title:'Mississippi Queen', artist:'Mountain', section:'Set 2', duration:212, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s31', title:'What I Like About You', artist:'The Romantics', section:'Set 2', duration:157, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s32', title:'Runnin\' Down a Dream', artist:'Tom Petty', section:'Set 2', duration:262, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
 ];
 
 let songs = [];
@@ -912,6 +939,14 @@ async function loadData(){
       }
       if(typeof s.inPlaylist !== 'boolean'){
         s.inPlaylist = defaultById[s.id] ? defaultById[s.id].inPlaylist : false;
+        changed = true;
+      }
+      if(typeof s.notFeasible !== 'boolean'){
+        s.notFeasible = defaultById[s.id] ? defaultById[s.id].notFeasible : false;
+        changed = true;
+      }
+      if(typeof s.notFeasibleReason !== 'string'){
+        s.notFeasibleReason = defaultById[s.id] ? defaultById[s.id].notFeasibleReason : '';
         changed = true;
       }
     });
@@ -1090,6 +1125,7 @@ function render(){
     <span class="rh-know">Know it</span>
     <span class="rh-learn">Learn?</span>
     <span class="rh-playlist">Playlist</span>
+    <span class="rh-blocked">Blocked?</span>
     <span class="rh-duration">Time</span>
     <span class="rh-dots">Your score</span>
     <span class="rh-avg">Avg</span>
@@ -1133,11 +1169,13 @@ function renderRow(s, num){
         <span class="row-title">${escapeHtml(s.title)}</span>
         <span class="row-artist">${escapeHtml(s.artist)}</span>
         ${s.cue ? `<span class="cue">${escapeHtml(s.cue)}</span>` : ''}
+        ${s.notFeasible && s.notFeasibleReason ? `<span class="blocked-tag">${escapeHtml(s.notFeasibleReason)}</span>` : ''}
       </div>
     </div>
     <button class="know-col ${s.known ? 'is-on' : ''}" title="Click to toggle">${s.known ? '✓ Know' : 'Know'}</button>
     <button class="learn-col ${s.needsToLearn ? 'is-on' : ''}" title="Click to toggle">${s.needsToLearn ? '✓ Learn' : 'Learn'}</button>
     <button class="playlist-col ${s.inPlaylist ? 'is-on' : ''}" title="Click to toggle">${s.inPlaylist ? '✓ Playlist' : '+ Playlist'}</button>
+    <button class="blocked-col ${s.notFeasible ? 'is-on' : ''}" title="Click to toggle">${s.notFeasible ? '🚫 Blocked' : 'Not Possible'}</button>
     <span class="row-duration">${fmtTime(s.duration)}</span>
     <div class="row-dots" data-song="${s.id}"></div>
     <span class="row-avg">${avg===null ? '—' : '<b>'+avg.toFixed(1)+'</b> avg · '+cnt+'v'}</span>
@@ -1147,6 +1185,7 @@ function renderRow(s, num){
   row.querySelector('.know-col').onclick = () => toggleFlag(s.id, 'known');
   row.querySelector('.learn-col').onclick = () => toggleFlag(s.id, 'needsToLearn');
   row.querySelector('.playlist-col').onclick = () => toggleFlag(s.id, 'inPlaylist');
+  row.querySelector('.blocked-col').onclick = () => toggleFlag(s.id, 'notFeasible');
 
   const dotsWrap = row.querySelector('.row-dots');
   for(let i=1;i<=5;i++){
@@ -1276,6 +1315,8 @@ function openAddModal(existing){
   document.getElementById('f-known').checked = existing ? !!existing.known : false;
   document.getElementById('f-needslearn').checked = existing ? !!existing.needsToLearn : false;
   document.getElementById('f-playlist').checked = existing ? !!existing.inPlaylist : false;
+  document.getElementById('f-notfeasible').checked = existing ? !!existing.notFeasible : false;
+  document.getElementById('f-notfeasible-reason').value = existing ? (existing.notFeasibleReason || '') : '';
   document.getElementById('f-save').textContent = existing ? 'Save changes' : 'Add song';
   document.getElementById('f-delete').style.display = existing ? 'inline-block' : 'none';
   document.getElementById('f-lookup-status').textContent = '';
@@ -1298,6 +1339,8 @@ document.getElementById('f-save').onclick = async () => {
   const known = document.getElementById('f-known').checked;
   const needsToLearn = document.getElementById('f-needslearn').checked;
   const inPlaylist = document.getElementById('f-playlist').checked;
+  const notFeasible = document.getElementById('f-notfeasible').checked;
+  const notFeasibleReason = document.getElementById('f-notfeasible-reason').value.trim();
   const wasEditingId = editingId;
 
   if(wasEditingId){
@@ -1305,11 +1348,12 @@ document.getElementById('f-save').onclick = async () => {
     if(song){
       song.title = title; song.artist = artist; song.duration = duration;
       song.cue = cue; song.known = known; song.needsToLearn = needsToLearn;
-      song.inPlaylist = inPlaylist;
+      song.inPlaylist = inPlaylist; song.notFeasible = notFeasible;
+      song.notFeasibleReason = notFeasibleReason;
     }
   } else {
     var newId = 'song-' + Date.now() + '-' + Math.floor(Math.random()*1000);
-    songs.push({id:newId, title, artist, section:'All', duration, cue, known, needsToLearn, inPlaylist});
+    songs.push({id:newId, title, artist, section:'All', duration, cue, known, needsToLearn, inPlaylist, notFeasible, notFeasibleReason});
   }
   document.getElementById('addOverlay').classList.remove('show');
   editingId = null;
@@ -1321,10 +1365,11 @@ document.getElementById('f-save').onclick = async () => {
       if(s){
         s.title = title; s.artist = artist; s.duration = duration;
         s.cue = cue; s.known = known; s.needsToLearn = needsToLearn;
-        s.inPlaylist = inPlaylist;
+        s.inPlaylist = inPlaylist; s.notFeasible = notFeasible;
+        s.notFeasibleReason = notFeasibleReason;
       }
     } else {
-      latest.push({id:newId, title, artist, section:'All', duration, cue, known, needsToLearn, inPlaylist});
+      latest.push({id:newId, title, artist, section:'All', duration, cue, known, needsToLearn, inPlaylist, notFeasible, notFeasibleReason});
     }
   });
 };
@@ -1417,6 +1462,7 @@ function renderReport(){
       case 'known': av = a.song.known ? 1 : 0; bv = b.song.known ? 1 : 0; break;
       case 'learn': av = a.song.needsToLearn ? 1 : 0; bv = b.song.needsToLearn ? 1 : 0; break;
       case 'playlist': av = a.song.inPlaylist ? 1 : 0; bv = b.song.inPlaylist ? 1 : 0; break;
+      case 'blocked': av = a.song.notFeasible ? 1 : 0; bv = b.song.notFeasible ? 1 : 0; break;
       case 'status': av = a.avg === null ? -1 : a.avg; bv = b.avg === null ? -1 : b.avg; break;
       case 'num': av = a.origIndex; bv = b.origIndex; break;
       case 'avg':
@@ -1449,6 +1495,7 @@ function renderReport(){
       + '<td><button class="rmini-btn ' + (s.known ? 'yes' : 'no') + '" data-song="' + s.id + '" data-field="known">' + (s.known ? 'Yes' : '—') + '</button></td>'
       + '<td><button class="rmini-btn ' + (s.needsToLearn ? 'yes' : 'no') + '" data-song="' + s.id + '" data-field="needsToLearn">' + (s.needsToLearn ? 'Yes' : '—') + '</button></td>'
       + '<td><button class="rmini-btn playlist ' + (s.inPlaylist ? 'yes' : 'no') + '" data-song="' + s.id + '" data-field="inPlaylist">' + (s.inPlaylist ? 'In Set' : '+ Add') + '</button></td>'
+      + '<td><button class="rmini-btn blocked ' + (s.notFeasible ? 'yes' : 'no') + '" data-song="' + s.id + '" data-field="notFeasible" title="' + escapeHtml(s.notFeasibleReason || '') + '">' + (s.notFeasible ? '🚫 Blocked' : '—') + '</button></td>'
       + '<td><span class="status-badge ' + st.cls + '">' + st.label + '</span></td>'
       + '</tr>';
   }).join('');
