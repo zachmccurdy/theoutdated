@@ -439,7 +439,7 @@
   }
   .field{ margin-bottom:14px; }
   .field label{ display:block; font-size:11px; color:var(--text-dim); margin-bottom:5px; text-transform:uppercase; letter-spacing:0.06em; }
-  .field input, .field select{
+  .field input, .field select, .field textarea{
     width:100%;
     background:var(--stage-black);
     border:1px solid var(--stage-black-3);
@@ -450,7 +450,33 @@
     font-size:14px;
     outline:none;
   }
-  .field input:focus, .field select:focus{ border-color:var(--amber-dim); }
+  .field input:focus, .field select:focus, .field textarea:focus{ border-color:var(--amber-dim); }
+  .field textarea{ resize:vertical; font-family:inherit; line-height:1.5; }
+
+  .note-modal-text{
+    white-space:pre-wrap;
+    color:var(--text-light);
+    font-size:14px;
+    line-height:1.6;
+    margin:0 0 4px;
+  }
+
+  .note-indicator{
+    background:rgba(232,163,61,0.16);
+    border:1px solid var(--amber-dim);
+    color:var(--amber);
+    border-radius:50%;
+    width:20px;
+    height:20px;
+    font-size:11px;
+    line-height:1;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+  }
+  .note-indicator:hover{ background:rgba(232,163,61,0.28); }
   .duration-row{ display:flex; gap:8px; align-items:center; }
   .duration-row input{ flex:1; }
   .duration-row .btn{ white-space:nowrap; flex-shrink:0; }
@@ -596,6 +622,46 @@
     font-weight:600;
   }
 
+  .search-wrap{
+    display:flex;
+    justify-content:center;
+    max-width:640px;
+    margin:14px auto 0;
+    padding:0 20px;
+  }
+  .search-box{
+    position:relative;
+    width:100%;
+    max-width:420px;
+  }
+  .search-input{
+    width:100%;
+    background:var(--stage-black-2);
+    border:1px solid var(--stage-black-3);
+    color:var(--text-light);
+    padding:10px 36px 10px 14px;
+    border-radius:20px;
+    font-family:'Space Grotesk',sans-serif;
+    font-size:13.5px;
+    outline:none;
+  }
+  .search-input::placeholder{ color:var(--text-faint); }
+  .search-input:focus{ border-color:var(--amber-dim); }
+  .search-clear{
+    position:absolute;
+    right:8px;
+    top:50%;
+    transform:translateY(-50%);
+    background:none;
+    border:none;
+    color:var(--text-faint);
+    cursor:pointer;
+    font-size:13px;
+    padding:4px;
+    line-height:1;
+  }
+  .search-clear:hover{ color:var(--text-light); }
+
   .report-wrap{
     max-width:1100px;
     margin:0 auto;
@@ -709,6 +775,13 @@
   <button class="tab-btn active" id="tabBoardBtn">Board</button>
   <button class="tab-btn" id="tabReportBtn">Report</button>
   <button class="tab-btn" id="tabSetlistBtn">Setlist</button>
+</div>
+
+<div class="search-wrap">
+  <div class="search-box">
+    <input type="text" id="searchInput" class="search-input" placeholder="Search by song or artist…">
+    <button class="search-clear" id="searchClear" style="display:none;" title="Clear search">✕</button>
+  </div>
 </div>
 
 <div id="boardView">
@@ -847,6 +920,10 @@
       <label>Why not possible? (optional)</label>
       <input id="f-notfeasible-reason" type="text" placeholder="e.g. needs a horn section">
     </div>
+    <div class="field">
+      <label>Notes (optional)</label>
+      <textarea id="f-notes" rows="3" placeholder="Anything worth remembering about this song — arrangement ideas, who's singing lead, key change discussion, etc."></textarea>
+    </div>
     <div class="modal-actions">
       <button class="btn ghost small" id="f-delete" style="display:none; margin-right:auto; color:var(--red);">Delete song</button>
       <button class="btn ghost small" id="f-cancel">Cancel</button>
@@ -868,49 +945,66 @@
   </div>
 </div>
 
+<div class="overlay" id="noteOverlay">
+  <div class="modal">
+    <h3 id="noteModalTitle">Note</h3>
+    <p id="noteModalText" class="note-modal-text"></p>
+    <div class="modal-actions">
+      <button class="btn ghost small" id="noteModalEdit">Edit song</button>
+      <button class="btn small" id="noteModalClose">Close</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const TARGET_SECONDS = 120*60;
 const SECTIONS = ["Set 1","Acoustic Break","Set 2"];
 
 const DEFAULT_SONGS = [
-  {id:'s1',  title:'Gimme Three Steps', artist:'Lynyrd Skynyrd', section:'Set 1', duration:272, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s2',  title:'Slow Ride', artist:'Foghat', section:'Set 1', duration:281, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s3',  title:'All Right Now', artist:'Free', section:'Set 1', duration:360, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s4',  title:'Hurts So Good', artist:'John Mellencamp', section:'Set 1', duration:217, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s5',  title:'Surrender', artist:'Cheap Trick', section:'Set 1', duration:161, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s6',  title:'Sweet Home Chicago', artist:'Blues Brothers', section:'Set 1', duration:300, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s7',  title:'Sweet Home Alabama', artist:'Lynyrd Skynyrd', section:'Set 1', duration:283, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s8',  title:'Come and Get Your Love', artist:'Redbone', section:'Set 1', duration:227, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s9',  title:'Feel Like Makin\' Love', artist:'Bad Company', section:'Set 1', duration:314, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s10', title:'Bad Moon Rising', artist:'Creedence Clearwater Revival', section:'Set 1', duration:140, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s11', title:'Can\'t You See', artist:'The Marshall Tucker Band', section:'Set 1', duration:278, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s12', title:'Free Fallin\'', artist:'Tom Petty', section:'Set 1', duration:255, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s13', title:'Brown Eyed Girl', artist:'Van Morrison', section:'Set 1', duration:187, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s14', title:'For What It\'s Worth', artist:'Buffalo Springfield', section:'Set 1', duration:157, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s15', title:'Take Me Home, Country Roads', artist:'John Denver', section:'Set 1', duration:190, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s16', title:'Learning to Fly', artist:'Tom Petty', section:'Set 1', duration:240, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s17', title:'Wagon Wheel', artist:'Old Crow Medicine Show', section:'Set 1', duration:274, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s18', title:'Tennessee Whiskey', artist:'Chris Stapleton', section:'Acoustic Break', duration:287, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s19', title:'Hold On Loosely', artist:'.38 Special', section:'Acoustic Break', duration:232, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s20', title:'I Won\'t Back Down', artist:'Tom Petty', section:'Acoustic Break', duration:177, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s21', title:'Just What I Needed', artist:'The Cars', section:'Acoustic Break', duration:221, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s22', title:'The Middle', artist:'Jimmy Eat World', section:'Acoustic Break', duration:165, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s23', title:'Radar Love', artist:'Golden Earring', section:'Acoustic Break', duration:390, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s24', title:'Your Love', artist:'The Outfield', section:'Acoustic Break', duration:296, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s25', title:'Fortunate Son', artist:'Creedence Clearwater Revival', section:'Set 2', duration:210, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s26', title:'Born to Be Wild', artist:'Steppenwolf', section:'Set 2', duration:210, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s27', title:'American Girl', artist:'Tom Petty', section:'Set 2', duration:212, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s28', title:'I\'ll Be There For You', artist:'The Rembrandts', section:'Set 2', duration:165, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s29', title:'Seven Nation Army', artist:'The White Stripes', section:'Set 2', duration:232, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s30', title:'Mississippi Queen', artist:'Mountain', section:'Set 2', duration:212, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s31', title:'What I Like About You', artist:'The Romantics', section:'Set 2', duration:157, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
-  {id:'s32', title:'Runnin\' Down a Dream', artist:'Tom Petty', section:'Set 2', duration:262, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:''},
+  {id:'s1',  title:'Gimme Three Steps', artist:'Lynyrd Skynyrd', section:'Set 1', duration:272, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s2',  title:'Slow Ride', artist:'Foghat', section:'Set 1', duration:281, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s3',  title:'All Right Now', artist:'Free', section:'Set 1', duration:360, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s4',  title:'Hurts So Good', artist:'John Mellencamp', section:'Set 1', duration:217, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s5',  title:'Surrender', artist:'Cheap Trick', section:'Set 1', duration:161, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s6',  title:'Sweet Home Chicago', artist:'Blues Brothers', section:'Set 1', duration:300, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s7',  title:'Sweet Home Alabama', artist:'Lynyrd Skynyrd', section:'Set 1', duration:283, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s8',  title:'Come and Get Your Love', artist:'Redbone', section:'Set 1', duration:227, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s9',  title:'Feel Like Makin\' Love', artist:'Bad Company', section:'Set 1', duration:314, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s10', title:'Bad Moon Rising', artist:'Creedence Clearwater Revival', section:'Set 1', duration:140, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s11', title:'Can\'t You See', artist:'The Marshall Tucker Band', section:'Set 1', duration:278, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s12', title:'Free Fallin\'', artist:'Tom Petty', section:'Set 1', duration:255, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s13', title:'Brown Eyed Girl', artist:'Van Morrison', section:'Set 1', duration:187, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s14', title:'For What It\'s Worth', artist:'Buffalo Springfield', section:'Set 1', duration:157, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s15', title:'Take Me Home, Country Roads', artist:'John Denver', section:'Set 1', duration:190, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s16', title:'Learning to Fly', artist:'Tom Petty', section:'Set 1', duration:240, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s17', title:'Wagon Wheel', artist:'Old Crow Medicine Show', section:'Set 1', duration:274, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s18', title:'Tennessee Whiskey', artist:'Chris Stapleton', section:'Acoustic Break', duration:287, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s19', title:'Hold On Loosely', artist:'.38 Special', section:'Acoustic Break', duration:232, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s20', title:'I Won\'t Back Down', artist:'Tom Petty', section:'Acoustic Break', duration:177, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s21', title:'Just What I Needed', artist:'The Cars', section:'Acoustic Break', duration:221, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s22', title:'The Middle', artist:'Jimmy Eat World', section:'Acoustic Break', duration:165, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s23', title:'Radar Love', artist:'Golden Earring', section:'Acoustic Break', duration:390, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s24', title:'Your Love', artist:'The Outfield', section:'Acoustic Break', duration:296, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s25', title:'Fortunate Son', artist:'Creedence Clearwater Revival', section:'Set 2', duration:210, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s26', title:'Born to Be Wild', artist:'Steppenwolf', section:'Set 2', duration:210, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s27', title:'American Girl', artist:'Tom Petty', section:'Set 2', duration:212, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s28', title:'I\'ll Be There For You', artist:'The Rembrandts', section:'Set 2', duration:165, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s29', title:'Seven Nation Army', artist:'The White Stripes', section:'Set 2', duration:232, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s30', title:'Mississippi Queen', artist:'Mountain', section:'Set 2', duration:212, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s31', title:'What I Like About You', artist:'The Romantics', section:'Set 2', duration:157, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
+  {id:'s32', title:'Runnin\' Down a Dream', artist:'Tom Petty', section:'Set 2', duration:262, cue:'', known:true, needsToLearn:false, inPlaylist:false, notFeasible:false, notFeasibleReason:'', notes:''},
 ];
 
 let songs = [];
 let votes = {}; // { songId: { voterName: score } }
 let myName = null;
 let editingId = null;
+let searchQuery = '';
+
+function matchesSearch(s){
+  if(!searchQuery) return true;
+  return (s.title || '').toLowerCase().includes(searchQuery) || (s.artist || '').toLowerCase().includes(searchQuery);
+}
 
 function fmtTime(sec){
   sec = Math.max(0, Math.round(sec));
@@ -987,6 +1081,10 @@ async function loadData(){
       }
       if(typeof s.notFeasibleReason !== 'string'){
         s.notFeasibleReason = defaultById[s.id] ? defaultById[s.id].notFeasibleReason : '';
+        changed = true;
+      }
+      if(typeof s.notes !== 'string'){
+        s.notes = defaultById[s.id] ? defaultById[s.id].notes : '';
         changed = true;
       }
     });
@@ -1148,10 +1246,13 @@ function render(){
   const wrap = document.createElement('div');
   wrap.className = 'section';
 
+  const filtered = songs.filter(matchesSearch);
+
   const head = document.createElement('div');
   head.className = 'section-head';
   let total = songs.reduce((a,s)=>a+s.duration,0);
-  head.innerHTML = '<h2>Song Pool</h2><span class="section-meta">'+songs.length+' songs · '+fmtTime(total)+' if all played</span>';
+  const countLabel = searchQuery ? (filtered.length + ' of ' + songs.length + ' songs') : (songs.length + ' songs');
+  head.innerHTML = '<h2>Song Pool</h2><span class="section-meta">'+countLabel+' · '+fmtTime(total)+' if all played</span>';
   wrap.appendChild(head);
 
   const sheet = document.createElement('div');
@@ -1175,9 +1276,17 @@ function render(){
   `;
   sheet.appendChild(header);
 
-  songs.forEach((s, idx) => {
-    sheet.appendChild(renderRow(s, idx+1));
-  });
+  if(filtered.length === 0){
+    const empty = document.createElement('div');
+    empty.className = 'add-row';
+    empty.style.cursor = 'default';
+    empty.textContent = 'No songs match "' + searchQuery + '"';
+    sheet.appendChild(empty);
+  } else {
+    filtered.forEach((s, idx) => {
+      sheet.appendChild(renderRow(s, idx+1));
+    });
+  }
 
   const addRow = document.createElement('div');
   addRow.className = 'add-row';
@@ -1213,6 +1322,7 @@ function renderRow(s, num){
         <span class="row-artist">${escapeHtml(s.artist)}</span>
         ${s.cue ? `<span class="cue">${escapeHtml(s.cue)}</span>` : ''}
         ${s.notFeasible && s.notFeasibleReason ? `<span class="blocked-tag">${escapeHtml(s.notFeasibleReason)}</span>` : ''}
+        ${s.notes ? `<button class="note-indicator" title="View note">📝</button>` : ''}
       </div>
     </div>
     <button class="know-col ${s.known ? 'is-on' : ''}" title="Click to toggle">${s.known ? '✓ Know' : 'Know'}</button>
@@ -1229,6 +1339,8 @@ function renderRow(s, num){
   row.querySelector('.learn-col').onclick = () => toggleFlag(s.id, 'needsToLearn');
   row.querySelector('.playlist-col').onclick = () => toggleFlag(s.id, 'inPlaylist');
   row.querySelector('.blocked-col').onclick = () => toggleFlag(s.id, 'notFeasible');
+  const noteBtn = row.querySelector('.note-indicator');
+  if(noteBtn) noteBtn.onclick = () => showNote(s);
 
   const dotsWrap = row.querySelector('.row-dots');
   for(let i=1;i<=5;i++){
@@ -1360,6 +1472,7 @@ function openAddModal(existing){
   document.getElementById('f-playlist').checked = existing ? !!existing.inPlaylist : false;
   document.getElementById('f-notfeasible').checked = existing ? !!existing.notFeasible : false;
   document.getElementById('f-notfeasible-reason').value = existing ? (existing.notFeasibleReason || '') : '';
+  document.getElementById('f-notes').value = existing ? (existing.notes || '') : '';
   document.getElementById('f-save').textContent = existing ? 'Save changes' : 'Add song';
   document.getElementById('f-delete').style.display = existing ? 'inline-block' : 'none';
   document.getElementById('f-lookup-status').textContent = '';
@@ -1384,6 +1497,7 @@ document.getElementById('f-save').onclick = async () => {
   const inPlaylist = document.getElementById('f-playlist').checked;
   const notFeasible = document.getElementById('f-notfeasible').checked;
   const notFeasibleReason = document.getElementById('f-notfeasible-reason').value.trim();
+  const notes = document.getElementById('f-notes').value.trim();
   const wasEditingId = editingId;
 
   if(!wasEditingId){
@@ -1408,11 +1522,11 @@ document.getElementById('f-save').onclick = async () => {
       song.title = title; song.artist = artist; song.duration = duration;
       song.cue = cue; song.known = known; song.needsToLearn = needsToLearn;
       song.inPlaylist = inPlaylist; song.notFeasible = notFeasible;
-      song.notFeasibleReason = notFeasibleReason;
+      song.notFeasibleReason = notFeasibleReason; song.notes = notes;
     }
   } else {
     var newId = 'song-' + Date.now() + '-' + Math.floor(Math.random()*1000);
-    songs.push({id:newId, title, artist, section:'All', duration, cue, known, needsToLearn, inPlaylist, notFeasible, notFeasibleReason});
+    songs.push({id:newId, title, artist, section:'All', duration, cue, known, needsToLearn, inPlaylist, notFeasible, notFeasibleReason, notes});
   }
   document.getElementById('addOverlay').classList.remove('show');
   editingId = null;
@@ -1425,10 +1539,10 @@ document.getElementById('f-save').onclick = async () => {
         s.title = title; s.artist = artist; s.duration = duration;
         s.cue = cue; s.known = known; s.needsToLearn = needsToLearn;
         s.inPlaylist = inPlaylist; s.notFeasible = notFeasible;
-        s.notFeasibleReason = notFeasibleReason;
+        s.notFeasibleReason = notFeasibleReason; s.notes = notes;
       }
     } else {
-      latest.push({id:newId, title, artist, section:'All', duration, cue, known, needsToLearn, inPlaylist, notFeasible, notFeasibleReason});
+      latest.push({id:newId, title, artist, section:'All', duration, cue, known, needsToLearn, inPlaylist, notFeasible, notFeasibleReason, notes});
     }
   });
 };
@@ -1461,6 +1575,22 @@ document.getElementById('f-name').addEventListener('keydown', e => {
   if(e.key === 'Enter') document.getElementById('f-name-save').click();
 });
 
+let noteModalSongId = null;
+function showNote(song){
+  noteModalSongId = song.id;
+  document.getElementById('noteModalTitle').textContent = 'Note — ' + song.title;
+  document.getElementById('noteModalText').textContent = song.notes;
+  document.getElementById('noteOverlay').classList.add('show');
+}
+document.getElementById('noteModalClose').onclick = () => {
+  document.getElementById('noteOverlay').classList.remove('show');
+};
+document.getElementById('noteModalEdit').onclick = () => {
+  const song = songs.find(s => s.id === noteModalSongId);
+  document.getElementById('noteOverlay').classList.remove('show');
+  if(song) openAddModal(song);
+};
+
 document.getElementById('resetBtn').onclick = async () => {
   if(!confirm('This clears the song list and every vote for everyone using this board. Continue?')) return;
   songs = DEFAULT_SONGS.slice();
@@ -1469,6 +1599,22 @@ document.getElementById('resetBtn').onclick = async () => {
   try{ await fbSet('songs', songs); await fbSet('votes', votes); }
   catch(e){ console.error('Could not reset', e); showSaveError('reset'); }
 };
+
+// ---- Search ----
+const searchInput = document.getElementById('searchInput');
+const searchClear = document.getElementById('searchClear');
+searchInput.addEventListener('input', () => {
+  searchQuery = searchInput.value.trim().toLowerCase();
+  searchClear.style.display = searchQuery ? 'block' : 'none';
+  render();
+});
+searchClear.addEventListener('click', () => {
+  searchInput.value = '';
+  searchQuery = '';
+  searchClear.style.display = 'none';
+  searchInput.focus();
+  render();
+});
 
 // ---- Tabs ----
 document.getElementById('tabBoardBtn').onclick = () => switchTab('board');
@@ -1493,7 +1639,7 @@ function renderSetlist(){
   const gaugeFill = document.getElementById('setlistGaugeFill');
   if(!tbody) return;
 
-  const selected = songs.filter(s => s.inPlaylist);
+  const selected = songs.filter(s => s.inPlaylist).filter(matchesSearch);
   const total = selected.reduce((a, s) => a + s.duration, 0);
 
   meta.textContent = selected.length + ' song' + (selected.length === 1 ? '' : 's');
@@ -1503,7 +1649,7 @@ function renderSetlist(){
   gaugeFill.classList.toggle('over', total > TARGET_SECONDS);
 
   if(selected.length === 0){
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#8a7f5c;padding:26px;">No songs added yet — toggle "+ Playlist" on the Board or Report tab to build the set.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#8a7f5c;padding:26px;">' + (searchQuery ? 'No songs in the set match "' + escapeHtml(searchQuery) + '"' : 'No songs added yet — toggle "+ Playlist" on the Board or Report tab to build the set.') + '</td></tr>';
     return;
   }
 
@@ -1512,7 +1658,7 @@ function renderSetlist(){
     running += s.duration;
     return '<tr>'
       + '<td>' + (i + 1) + '</td>'
-      + '<td class="title-cell">' + escapeHtml(s.title) + '</td>'
+      + '<td class="title-cell">' + escapeHtml(s.title) + (s.notes ? ' <button class="note-indicator" data-song="' + s.id + '" title="View note">📝</button>' : '') + '</td>'
       + '<td class="artist-cell">' + escapeHtml(s.artist) + '</td>'
       + '<td>' + fmtTime(s.duration) + '</td>'
       + '<td>' + fmtTime(running) + '</td>'
@@ -1523,6 +1669,12 @@ function renderSetlist(){
   tbody.querySelectorAll('.rmini-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       toggleFlag(btn.getAttribute('data-song'), btn.getAttribute('data-field'));
+    });
+  });
+  tbody.querySelectorAll('.note-indicator').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const song = songs.find(s => s.id === btn.getAttribute('data-song'));
+      if(song) showNote(song);
     });
   });
 }
@@ -1624,11 +1776,9 @@ function renderReport(){
   const meta = document.getElementById('reportMeta');
   if(!tbody) return;
 
-  const rows = songs.map((s, idx) => {
-    const avg = avgFor(s.id);
-    const cnt = countFor(s.id);
-    return {song: s, origIndex: idx, avg, cnt};
-  });
+  const rows = songs
+    .map((s, idx) => ({song: s, origIndex: idx, avg: avgFor(s.id), cnt: countFor(s.id)}))
+    .filter(r => matchesSearch(r.song));
 
   const dirMul = reportSort.dir === 'asc' ? 1 : -1;
   rows.sort((a, b) => {
@@ -1666,7 +1816,7 @@ function renderReport(){
     const st = statusFor(r.avg);
     return '<tr>'
       + '<td>' + (i + 1) + '</td>'
-      + '<td class="title-cell">' + escapeHtml(s.title) + '</td>'
+      + '<td class="title-cell">' + escapeHtml(s.title) + (s.notes ? ' <button class="note-indicator" data-song="' + s.id + '" title="View note">📝</button>' : '') + '</td>'
       + '<td class="artist-cell">' + escapeHtml(s.artist) + '</td>'
       + '<td class="avg-cell">' + (r.avg === null ? '—' : r.avg.toFixed(1)) + '</td>'
       + '<td>' + r.cnt + '</td>'
@@ -1679,11 +1829,17 @@ function renderReport(){
       + '</tr>';
   }).join('');
 
-  meta.textContent = songs.length + ' songs';
+  meta.textContent = searchQuery ? (rows.length + ' of ' + songs.length + ' songs') : (songs.length + ' songs');
 
   tbody.querySelectorAll('.rmini-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       toggleFlag(btn.getAttribute('data-song'), btn.getAttribute('data-field'));
+    });
+  });
+  tbody.querySelectorAll('.note-indicator').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const song = songs.find(s => s.id === btn.getAttribute('data-song'));
+      if(song) showNote(song);
     });
   });
 }
