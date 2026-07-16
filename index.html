@@ -677,6 +677,11 @@
   .report-table .rmini-btn.yes{ background:rgba(99,161,95,0.18); color:#3f6b3c; border-color:transparent; }
   .report-table .rmini-btn.playlist.yes{ background:rgba(232,163,61,0.22); color:#8a611c; border-color:transparent; font-weight:700; }
   .report-table .rmini-btn.blocked.yes{ background:#4a4038; color:#f2ede0; border-color:transparent; font-weight:700; }
+
+  .setlist-gauge-wrap{
+    max-width:520px;
+    margin:0 auto 22px;
+  }
 </style>
 </head>
 <body>
@@ -703,6 +708,7 @@
 <div class="tabs">
   <button class="tab-btn active" id="tabBoardBtn">Board</button>
   <button class="tab-btn" id="tabReportBtn">Report</button>
+  <button class="tab-btn" id="tabSetlistBtn">Setlist</button>
 </div>
 
 <div id="boardView">
@@ -727,6 +733,7 @@
     <div class="report-head">
       <h2>Ratings Report</h2>
       <span class="section-meta" id="reportMeta"></span>
+      <button class="btn ghost small" id="dedupeBtn" style="margin-left:auto;">Clean Up Duplicates</button>
     </div>
     <div class="report-table-wrap">
       <table class="report-table" id="reportTable">
@@ -746,6 +753,39 @@
           </tr>
         </thead>
         <tbody id="reportBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="setlistView" style="display:none;">
+  <div class="report-wrap">
+    <div class="report-head">
+      <h2>Show Setlist</h2>
+      <span class="section-meta" id="setlistMeta"></span>
+    </div>
+
+    <div class="setlist-gauge-wrap">
+      <div class="gauge-labels">
+        <span>Total set time</span>
+        <b id="setlistTotalTime">0:00 / 120:00</b>
+      </div>
+      <div class="gauge"><div class="gauge-fill" id="setlistGaugeFill" style="width:0%"></div></div>
+    </div>
+
+    <div class="report-table-wrap">
+      <table class="report-table" id="setlistTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Song</th>
+            <th>Artist</th>
+            <th>Time</th>
+            <th>Running Total</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="setlistBody"></tbody>
       </table>
     </div>
   </div>
@@ -1151,6 +1191,9 @@ function render(){
   if(document.getElementById('reportView').style.display !== 'none'){
     renderReport();
   }
+  if(document.getElementById('setlistView').style.display !== 'none'){
+    renderSetlist();
+  }
 }
 
 function renderRow(s, num){
@@ -1343,6 +1386,22 @@ document.getElementById('f-save').onclick = async () => {
   const notFeasibleReason = document.getElementById('f-notfeasible-reason').value.trim();
   const wasEditingId = editingId;
 
+  if(!wasEditingId){
+    const normTitle = title.toLowerCase();
+    const normArtist = artist.toLowerCase();
+    const dupe = songs.find(s => {
+      const sTitle = (s.title || '').trim().toLowerCase();
+      const sArtist = (s.artist || '').trim().toLowerCase();
+      if(sTitle !== normTitle) return false;
+      if(!normArtist || !sArtist) return true; // match on title alone if either artist is blank
+      return sArtist === normArtist;
+    });
+    if(dupe){
+      const proceed = confirm('"' + dupe.title + '"' + (dupe.artist ? ' by ' + dupe.artist : '') + ' is already on the list. Add another copy anyway?');
+      if(!proceed) return;
+    }
+  }
+
   if(wasEditingId){
     const song = songs.find(s => s.id === wasEditingId);
     if(song){
@@ -1414,14 +1473,134 @@ document.getElementById('resetBtn').onclick = async () => {
 // ---- Tabs ----
 document.getElementById('tabBoardBtn').onclick = () => switchTab('board');
 document.getElementById('tabReportBtn').onclick = () => switchTab('report');
+document.getElementById('tabSetlistBtn').onclick = () => switchTab('setlist');
 
 function switchTab(tab){
   document.getElementById('boardView').style.display = tab === 'board' ? 'block' : 'none';
   document.getElementById('reportView').style.display = tab === 'report' ? 'block' : 'none';
+  document.getElementById('setlistView').style.display = tab === 'setlist' ? 'block' : 'none';
   document.getElementById('tabBoardBtn').classList.toggle('active', tab === 'board');
   document.getElementById('tabReportBtn').classList.toggle('active', tab === 'report');
+  document.getElementById('tabSetlistBtn').classList.toggle('active', tab === 'setlist');
   if(tab === 'report') renderReport();
+  if(tab === 'setlist') renderSetlist();
 }
+
+function renderSetlist(){
+  const tbody = document.getElementById('setlistBody');
+  const meta = document.getElementById('setlistMeta');
+  const totalEl = document.getElementById('setlistTotalTime');
+  const gaugeFill = document.getElementById('setlistGaugeFill');
+  if(!tbody) return;
+
+  const selected = songs.filter(s => s.inPlaylist);
+  const total = selected.reduce((a, s) => a + s.duration, 0);
+
+  meta.textContent = selected.length + ' song' + (selected.length === 1 ? '' : 's');
+  totalEl.textContent = fmtTime(total) + ' / 120:00';
+  const pct = Math.min(100, (total / TARGET_SECONDS) * 100);
+  gaugeFill.style.width = pct + '%';
+  gaugeFill.classList.toggle('over', total > TARGET_SECONDS);
+
+  if(selected.length === 0){
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#8a7f5c;padding:26px;">No songs added yet — toggle "+ Playlist" on the Board or Report tab to build the set.</td></tr>';
+    return;
+  }
+
+  let running = 0;
+  tbody.innerHTML = selected.map((s, i) => {
+    running += s.duration;
+    return '<tr>'
+      + '<td>' + (i + 1) + '</td>'
+      + '<td class="title-cell">' + escapeHtml(s.title) + '</td>'
+      + '<td class="artist-cell">' + escapeHtml(s.artist) + '</td>'
+      + '<td>' + fmtTime(s.duration) + '</td>'
+      + '<td>' + fmtTime(running) + '</td>'
+      + '<td><button class="rmini-btn playlist yes" data-song="' + s.id + '" data-field="inPlaylist">Remove</button></td>'
+      + '</tr>';
+  }).join('');
+
+  tbody.querySelectorAll('.rmini-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      toggleFlag(btn.getAttribute('data-song'), btn.getAttribute('data-field'));
+    });
+  });
+}
+
+// ---- Duplicate cleanup ----
+document.getElementById('dedupeBtn').onclick = async () => {
+  if(!confirm('Scan for duplicate songs (same title & artist), merge their votes into one entry, and remove the extras? This can\'t be undone.')) return;
+
+  let latestSongs, latestVotes;
+  try{
+    latestSongs = await fbGet('songs');
+    latestVotes = await fbGet('votes');
+  } catch(e){
+    console.error('Could not load latest data for dedupe', e);
+    alert('Could not load the latest data to check for duplicates. Try again.');
+    return;
+  }
+  if(!Array.isArray(latestSongs)) latestSongs = songs.slice();
+  if(!latestVotes || typeof latestVotes !== 'object') latestVotes = {};
+
+  const groups = {};
+  latestSongs.forEach(s => {
+    const key = (s.title || '').trim().toLowerCase() + '|' + (s.artist || '').trim().toLowerCase();
+    if(!groups[key]) groups[key] = [];
+    groups[key].push(s);
+  });
+
+  const survivors = [];
+  let mergedCount = 0;
+
+  Object.values(groups).forEach(group => {
+    if(group.length === 1){ survivors.push(group[0]); return; }
+
+    let survivor = group.reduce((best, g) => {
+      const bestVotes = Object.keys(latestVotes[best.id] || {}).length;
+      const gVotes = Object.keys(latestVotes[g.id] || {}).length;
+      return gVotes > bestVotes ? g : best;
+    }, group[0]);
+
+    group.forEach(g => {
+      if(g.id === survivor.id) return;
+      survivor.known = survivor.known || g.known;
+      survivor.needsToLearn = survivor.needsToLearn || g.needsToLearn;
+      survivor.inPlaylist = survivor.inPlaylist || g.inPlaylist;
+      survivor.notFeasible = survivor.notFeasible || g.notFeasible;
+      if(!survivor.cue && g.cue) survivor.cue = g.cue;
+      if(!survivor.notFeasibleReason && g.notFeasibleReason) survivor.notFeasibleReason = g.notFeasibleReason;
+
+      const gVotes = latestVotes[g.id] || {};
+      if(!latestVotes[survivor.id]) latestVotes[survivor.id] = {};
+      Object.keys(gVotes).forEach(voter => {
+        if(!(voter in latestVotes[survivor.id])) latestVotes[survivor.id][voter] = gVotes[voter];
+      });
+      delete latestVotes[g.id];
+      mergedCount++;
+    });
+
+    survivors.push(survivor);
+  });
+
+  if(mergedCount === 0){
+    alert('No duplicates found.');
+    return;
+  }
+
+  songs = survivors;
+  votes = latestVotes;
+  render();
+
+  try{
+    await fbSet('songs', songs);
+    await fbSet('votes', votes);
+    alert('Merged ' + mergedCount + ' duplicate' + (mergedCount === 1 ? '' : 's') + '. Votes from each were combined into the song that was kept.');
+  } catch(e){
+    console.error('Could not save after dedupe', e);
+    showSaveError('duplicate cleanup');
+  }
+};
 
 // ---- Report ----
 let reportSort = {field: 'avg', dir: 'desc'};
