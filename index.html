@@ -853,6 +853,7 @@
             <th>#</th>
             <th>Song</th>
             <th>Artist</th>
+            <th>Avg</th>
             <th>Time</th>
             <th>Running Total</th>
             <th></th>
@@ -1649,17 +1650,19 @@ function renderSetlist(){
   gaugeFill.classList.toggle('over', total > TARGET_SECONDS);
 
   if(selected.length === 0){
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#8a7f5c;padding:26px;">' + (searchQuery ? 'No songs in the set match "' + escapeHtml(searchQuery) + '"' : 'No songs added yet — toggle "+ Playlist" on the Board or Report tab to build the set.') + '</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#8a7f5c;padding:26px;">' + (searchQuery ? 'No songs in the set match "' + escapeHtml(searchQuery) + '"' : 'No songs added yet — toggle "+ Playlist" on the Board or Report tab to build the set.') + '</td></tr>';
     return;
   }
 
   let running = 0;
   tbody.innerHTML = selected.map((s, i) => {
     running += s.duration;
+    const avg = avgFor(s.id);
     return '<tr>'
       + '<td>' + (i + 1) + '</td>'
       + '<td class="title-cell">' + escapeHtml(s.title) + (s.notes ? ' <button class="note-indicator" data-song="' + s.id + '" title="View note">📝</button>' : '') + '</td>'
       + '<td class="artist-cell">' + escapeHtml(s.artist) + '</td>'
+      + '<td class="avg-cell">' + (avg === null ? '—' : avg.toFixed(1)) + '</td>'
       + '<td>' + fmtTime(s.duration) + '</td>'
       + '<td>' + fmtTime(running) + '</td>'
       + '<td><button class="rmini-btn playlist yes" data-song="' + s.id + '" data-field="inPlaylist">Remove</button></td>'
