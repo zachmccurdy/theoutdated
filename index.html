@@ -440,8 +440,15 @@
     background:var(--stage-black-2);
     border:1px solid var(--stage-black-3);
     border-radius:6px;
-    padding:26px;
     width:100%; max-width:420px;
+    max-height:calc(100vh - 40px);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+  .modal-scroll{
+    padding:26px;
+    overflow-y:auto;
   }
   .modal h3{
     font-family:'Oswald',sans-serif;
@@ -509,7 +516,12 @@
   .checkbox-label input{ width:auto; accent-color:var(--amber); cursor:pointer; }
   .field-row{ display:flex; gap:10px; }
   .field-row .field{ flex:1; }
-  .modal-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }
+  .modal-actions{
+    display:flex; justify-content:flex-end; gap:10px;
+    padding:16px 26px;
+    border-top:1px solid var(--stage-black-3);
+    flex-shrink:0;
+  }
 
   footer{
     text-align:center;
@@ -888,6 +900,7 @@
 
 <div class="overlay" id="addOverlay">
   <div class="modal">
+    <div class="modal-scroll">
     <h3 id="modalTitle">Add a song</h3>
     <div class="field">
       <label>Title</label>
@@ -967,6 +980,7 @@
       <label>Notes (optional)</label>
       <textarea id="f-notes" rows="3" placeholder="Anything worth remembering about this song — arrangement ideas, who's singing lead, key change discussion, etc."></textarea>
     </div>
+    </div>
     <div class="modal-actions">
       <button class="btn ghost small" id="f-delete" style="display:none; margin-right:auto; color:var(--red);">Delete song</button>
       <button class="btn ghost small" id="f-cancel">Cancel</button>
@@ -977,10 +991,12 @@
 
 <div class="overlay" id="nameOverlay">
   <div class="modal">
+    <div class="modal-scroll">
     <h3>Who's voting?</h3>
     <div class="field">
       <label>Your name</label>
       <input id="f-name" type="text" placeholder="e.g. Zach">
+    </div>
     </div>
     <div class="modal-actions">
       <button class="btn small" id="f-name-save">Let's go</button>
@@ -990,8 +1006,10 @@
 
 <div class="overlay" id="noteOverlay">
   <div class="modal">
+    <div class="modal-scroll">
     <h3 id="noteModalTitle">Note</h3>
     <p id="noteModalText" class="note-modal-text"></p>
+    </div>
     <div class="modal-actions">
       <button class="btn ghost small" id="noteModalEdit">Edit song</button>
       <button class="btn small" id="noteModalClose">Close</button>
