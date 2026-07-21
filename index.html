@@ -331,7 +331,7 @@
   .row-header .rh-risky{ width:64px; flex-shrink:0; text-align:center; }
   .row-header .rh-easy{ width:60px; flex-shrink:0; text-align:center; }
   .row-header .rh-duration{ width:40px; flex-shrink:0; text-align:right; }
-  .row-header .rh-dots{ width:134px; flex-shrink:0; }
+  .row-header .rh-dots{ width:160px; flex-shrink:0; }
   .row-header .rh-avg{ width:78px; flex-shrink:0; text-align:right; }
   .row-header .rh-status{ min-width:52px; flex-shrink:0; text-align:center; }
   .row-header .rh-spotify{ width:28px; flex-shrink:0; }
@@ -342,8 +342,14 @@
     font-size:11px; color:#8a7f5c; width:40px; text-align:right; flex-shrink:0;
   }
 
-  .row-dots{ display:flex; gap:3px; flex-shrink:0; }
-  .dot{
+  .dots-group{ display:flex; flex-direction:column; gap:5px; flex-shrink:0; }
+  .dots-row{ display:flex; align-items:center; gap:6px; }
+  .dots-label{
+    font-size:9px; color:#8a7f5c; width:30px; flex-shrink:0;
+    text-transform:uppercase; letter-spacing:0.03em;
+  }
+  .row-dots, .row-comfort-dots{ display:flex; gap:3px; flex-shrink:0; }
+  .dot, .comfort-dot{
     width:22px; height:22px;
     border-radius:50%;
     border:1px solid #b8ab84;
@@ -357,11 +363,17 @@
     flex-shrink:0;
     padding:0;
   }
-  .dot:hover{ border-color:#8a7f5c; }
+  .dot:hover, .comfort-dot:hover{ border-color:#8a7f5c; }
   .dot.active{
     background:#3a3122;
     border-color:#3a3122;
     color:var(--amber);
+    font-weight:700;
+  }
+  .comfort-dot.active{
+    background:#1a6b6b;
+    border-color:#1a6b6b;
+    color:#dff5f5;
     font-weight:700;
   }
 
@@ -426,7 +438,7 @@
     .risky-col{ order:2; }
     .easy-col{ order:2; }
     .row-duration{ order:3; }
-    .row-dots{ order:4; }
+    .dots-group{ order:4; }
     .row-avg{ order:5; }
     .status-badge{ order:6; }
     .spotify-btn{ order:7; }
@@ -780,6 +792,53 @@
     max-width:520px;
     margin:0 auto 22px;
   }
+
+  .comfort-legend{
+    font-size:12px;
+    color:var(--text-dim);
+    max-width:1100px;
+    margin:0 0 16px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    flex-wrap:wrap;
+  }
+  .legend-swatch{
+    display:inline-block;
+    width:12px; height:12px;
+    border-radius:3px;
+    margin-right:2px;
+  }
+  .legend-swatch.low{ background:#c1503f; }
+  .legend-swatch.mid{ background:#d9a441; }
+  .legend-swatch.high{ background:#63a15f; }
+  .legend-dash{ color:var(--text-faint); margin-right:2px; }
+
+  .comfort-cell{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:26px; height:26px;
+    border-radius:5px;
+    font-size:12px;
+    font-weight:700;
+    color:#2a2412;
+  }
+  .comfort-cell.c-low{ background:rgba(193,80,63,0.28); color:#7a2f22; }
+  .comfort-cell.c-mid{ background:rgba(217,164,65,0.3); color:#7a5a1c; }
+  .comfort-cell.c-high{ background:rgba(99,161,95,0.3); color:#2f5c2d; }
+  .comfort-cell.c-none{ background:transparent; color:#b8ab94; font-weight:400; }
+
+  .comfort-name-cell{
+    font-family:'Oswald',sans-serif;
+    font-size:10.5px;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    color:#6b6250;
+    text-align:center;
+  }
+  .comfort-avg-cell{ font-weight:700; }
+  .comfort-priority-row{ box-shadow:inset 3px 0 0 var(--amber); }
 </style>
 </head>
 <body>
@@ -807,6 +866,7 @@
   <button class="tab-btn active" id="tabBoardBtn">Board</button>
   <button class="tab-btn" id="tabReportBtn">Report</button>
   <button class="tab-btn" id="tabSetlistBtn">Setlist</button>
+  <button class="tab-btn" id="tabComfortBtn">Comfort</button>
 </div>
 
 <div class="search-wrap">
@@ -894,6 +954,28 @@
           </tr>
         </thead>
         <tbody id="setlistBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="comfortView" style="display:none;">
+  <div class="report-wrap">
+    <div class="report-head">
+      <h2>Comfort Grid</h2>
+      <span class="section-meta" id="comfortMeta"></span>
+    </div>
+    <p class="comfort-legend">
+      Sorted lowest average comfort first. Each cell is one person's 1–5 comfort level for that song —
+      <span class="legend-swatch low"></span> low,
+      <span class="legend-swatch mid"></span> mid,
+      <span class="legend-swatch high"></span> high,
+      <span class="legend-dash">—</span> not set.
+    </p>
+    <div class="report-table-wrap">
+      <table class="report-table" id="comfortTable">
+        <thead><tr id="comfortHeadRow"></tr></thead>
+        <tbody id="comfortBody"></tbody>
       </table>
     </div>
   </div>
@@ -1070,6 +1152,7 @@ const DEFAULT_SONGS = [
 
 let songs = [];
 let votes = {}; // { songId: { voterName: score } }
+let comfort = {}; // { songId: { voterName: comfortLevel } } — visible by name, unlike votes
 let myName = null;
 let editingId = null;
 let searchQuery = '';
@@ -1126,6 +1209,14 @@ async function loadData(){
 
     songs = Array.isArray(songsData) ? songsData : DEFAULT_SONGS.slice();
     votes = votesData || {};
+
+    try{
+      const comfortData = await fbGet('comfort');
+      comfort = comfortData || {};
+    } catch(e){
+      console.error('Could not load comfort levels', e);
+      comfort = {};
+    }
 
     // migrate: clear old performance notes / backfill new fields on originally preloaded songs
     const defaultById = {};
@@ -1228,6 +1319,17 @@ async function withFreshVotes(mutator){
   render();
 }
 
+async function withFreshComfort(mutator){
+  let latest;
+  try{ latest = await fbGet('comfort'); } catch(e){ latest = null; }
+  if(!latest || typeof latest !== 'object') latest = JSON.parse(JSON.stringify(comfort));
+  mutator(latest);
+  comfort = latest;
+  try{ await fbSet('comfort', comfort); }
+  catch(e){ console.error('Could not save comfort level', e); showSaveError('comfort level'); }
+  render();
+}
+
 async function saveIdentity(name){
   try{ localStorage.setItem('setlist-voter-name', name); }
   catch(e){ console.error('Could not save identity', e); }
@@ -1243,6 +1345,13 @@ function avgFor(songId){
 function countFor(songId){
   const v = votes[songId];
   return v ? Object.keys(v).length : 0;
+}
+function avgComfortFor(songId){
+  const c = comfort[songId];
+  if(!c) return null;
+  const vals = Object.values(c);
+  if(vals.length === 0) return null;
+  return vals.reduce((a,b)=>a+b,0) / vals.length;
 }
 function statusFor(avg){
   if(avg === null) return {cls:'status-none', label:'Unrated'};
@@ -1355,7 +1464,7 @@ function render(){
     <span class="rh-risky">Risky?</span>
     <span class="rh-easy">Easy?</span>
     <span class="rh-duration">Time</span>
-    <span class="rh-dots">Your score</span>
+    <span class="rh-dots">Rate / Comfort</span>
     <span class="rh-avg">Avg</span>
     <span class="rh-status">Status</span>
     <span class="rh-spotify"></span>
@@ -1390,6 +1499,9 @@ function render(){
   if(document.getElementById('setlistView').style.display !== 'none'){
     renderSetlist();
   }
+  if(document.getElementById('comfortView').style.display !== 'none'){
+    renderComfortGrid();
+  }
 }
 
 function renderRow(s, num){
@@ -1400,6 +1512,7 @@ function renderRow(s, num){
   const cnt = countFor(s.id);
   const st = statusFor(avg);
   const myScore = (votes[s.id] && myName) ? votes[s.id][myName] : undefined;
+  const myComfort = (comfort[s.id] && myName) ? comfort[s.id][myName] : undefined;
 
   row.innerHTML = `
     <span class="row-num">${String(num).padStart(2,'0')}</span>
@@ -1420,7 +1533,16 @@ function renderRow(s, num){
     <button class="risky-col ${s.risky ? 'is-on' : ''}" title="Click to toggle">${s.risky ? '⚠ Risky' : 'Risky?'}</button>
     <button class="easy-col ${s.easy ? 'is-on' : ''}" title="Click to toggle">${s.easy ? '⚡ Easy' : 'Easy?'}</button>
     <span class="row-duration">${fmtTime(s.duration)}</span>
-    <div class="row-dots" data-song="${s.id}"></div>
+    <div class="dots-group">
+      <div class="dots-row">
+        <span class="dots-label">Rate</span>
+        <div class="row-dots" data-song="${s.id}"></div>
+      </div>
+      <div class="dots-row">
+        <span class="dots-label">Feel</span>
+        <div class="row-comfort-dots" data-song="${s.id}"></div>
+      </div>
+    </div>
     <span class="row-avg">${avg===null ? '—' : '<b>'+avg.toFixed(1)+'</b> avg · '+cnt+'v'}</span>
     <span class="status-badge ${st.cls}">${st.label}</span>
   `;
@@ -1439,8 +1561,19 @@ function renderRow(s, num){
     const dot = document.createElement('button');
     dot.className = 'dot' + (myScore === i ? ' active' : '');
     dot.textContent = i;
+    dot.title = 'Rate ' + i;
     dot.onclick = () => castVote(s.id, i);
     dotsWrap.appendChild(dot);
+  }
+
+  const comfortDotsWrap = row.querySelector('.row-comfort-dots');
+  for(let i=1;i<=5;i++){
+    const dot = document.createElement('button');
+    dot.className = 'comfort-dot' + (myComfort === i ? ' active' : '');
+    dot.textContent = i;
+    dot.title = 'Comfort level ' + i;
+    dot.onclick = () => castComfort(s.id, i);
+    comfortDotsWrap.appendChild(dot);
   }
 
   const spotifyBtn = document.createElement('button');
@@ -1495,6 +1628,29 @@ async function castVote(songId, score){
     if(!latest[songId]) latest[songId] = {};
     if(newScore === undefined) delete latest[songId][myName];
     else latest[songId][myName] = newScore;
+    if(Object.keys(latest[songId]).length === 0) delete latest[songId];
+  });
+}
+
+async function castComfort(songId, level){
+  if(!myName){
+    document.getElementById('nameOverlay').classList.add('show');
+    return;
+  }
+  if(!comfort[songId]) comfort[songId] = {};
+  let newLevel;
+  if(comfort[songId][myName] === level){
+    delete comfort[songId][myName];
+    newLevel = undefined;
+  } else {
+    comfort[songId][myName] = level;
+    newLevel = level;
+  }
+  render();
+  await withFreshComfort(latest => {
+    if(!latest[songId]) latest[songId] = {};
+    if(newLevel === undefined) delete latest[songId][myName];
+    else latest[songId][myName] = newLevel;
     if(Object.keys(latest[songId]).length === 0) delete latest[songId];
   });
 }
@@ -1756,16 +1912,75 @@ searchClear.addEventListener('click', () => {
 document.getElementById('tabBoardBtn').onclick = () => switchTab('board');
 document.getElementById('tabReportBtn').onclick = () => switchTab('report');
 document.getElementById('tabSetlistBtn').onclick = () => switchTab('setlist');
+document.getElementById('tabComfortBtn').onclick = () => switchTab('comfort');
 
 function switchTab(tab){
   document.getElementById('boardView').style.display = tab === 'board' ? 'block' : 'none';
   document.getElementById('reportView').style.display = tab === 'report' ? 'block' : 'none';
   document.getElementById('setlistView').style.display = tab === 'setlist' ? 'block' : 'none';
+  document.getElementById('comfortView').style.display = tab === 'comfort' ? 'block' : 'none';
   document.getElementById('tabBoardBtn').classList.toggle('active', tab === 'board');
   document.getElementById('tabReportBtn').classList.toggle('active', tab === 'report');
   document.getElementById('tabSetlistBtn').classList.toggle('active', tab === 'setlist');
+  document.getElementById('tabComfortBtn').classList.toggle('active', tab === 'comfort');
   if(tab === 'report') renderReport();
   if(tab === 'setlist') renderSetlist();
+  if(tab === 'comfort') renderComfortGrid();
+}
+
+function comfortClass(level){
+  if(level === undefined || level === null) return 'c-none';
+  if(level <= 2) return 'c-low';
+  if(level === 3) return 'c-mid';
+  return 'c-high';
+}
+
+function renderComfortGrid(){
+  const headRow = document.getElementById('comfortHeadRow');
+  const tbody = document.getElementById('comfortBody');
+  const meta = document.getElementById('comfortMeta');
+  if(!tbody) return;
+
+  // union of everyone who has voted or given a comfort level at least once
+  const names = new Set();
+  Object.values(votes).forEach(v => Object.keys(v).forEach(n => names.add(n)));
+  Object.values(comfort).forEach(c => Object.keys(c).forEach(n => names.add(n)));
+  const memberNames = Array.from(names).sort((a, b) => a.localeCompare(b));
+
+  headRow.innerHTML = '<th>Song</th>' + memberNames.map(n => '<th style="text-align:center;">' + escapeHtml(n) + '</th>').join('') + '<th>Avg</th>';
+
+  const rows = songs
+    .filter(matchesSearch)
+    .map(s => ({song: s, avg: avgComfortFor(s.id)}));
+
+  rows.sort((a, b) => {
+    const av = a.avg === null ? 999 : a.avg;
+    const bv = b.avg === null ? 999 : b.avg;
+    return av - bv;
+  });
+
+  meta.textContent = memberNames.length === 0
+    ? 'No comfort levels submitted yet'
+    : rows.length + ' songs · ' + memberNames.length + ' member' + (memberNames.length === 1 ? '' : 's');
+
+  if(memberNames.length === 0){
+    tbody.innerHTML = '<tr><td style="text-align:center;color:#8a7f5c;padding:26px;">Nobody has set a comfort level yet — use the "Feel" dots on the Board tab.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = rows.map(r => {
+    const s = r.song;
+    const rowClass = s.inPlaylist && r.avg !== null && r.avg < 3 ? ' class="comfort-priority-row"' : '';
+    const cells = memberNames.map(n => {
+      const level = comfort[s.id] ? comfort[s.id][n] : undefined;
+      return '<td style="text-align:center;"><span class="comfort-cell ' + comfortClass(level) + '">' + (level || '—') + '</span></td>';
+    }).join('');
+    return '<tr' + rowClass + '>'
+      + '<td class="title-cell">' + escapeHtml(s.title) + (s.inPlaylist ? ' <span class="status-badge status-in">In Set</span>' : '') + '<div class="artist-cell">' + escapeHtml(s.artist) + '</div></td>'
+      + cells
+      + '<td class="comfort-avg-cell">' + (r.avg === null ? '—' : r.avg.toFixed(1)) + '</td>'
+      + '</tr>';
+  }).join('');
 }
 
 function renderSetlist(){
